@@ -72,8 +72,8 @@
   /* ── HEADER ── */
   header {
     text-align: center;
-    padding: 2.5rem 0 2rem;
-    margin-bottom: 1.8rem;
+    padding: 2.5rem 0 1rem;
+    margin-bottom: 0.9rem;
     position: relative;
   }
   header::after {
@@ -81,7 +81,7 @@
     display: block;
     height: 1px;
     background: linear-gradient(90deg, transparent 0%, var(--gold-dim) 30%, var(--gold) 50%, var(--gold-dim) 70%, transparent 100%);
-    margin-top: 2rem;
+    margin-top: 1rem;
     opacity: 0.6;
   }
   .header-eyebrow {
@@ -811,37 +811,86 @@
 
   /* ── LIGHT MODE ── */
   body.light {
-    --bg: #f0ece4;
-    --gold-light: #8a5c00;
-    --gold:       #b07800;
-    --gold-dim:   #c89a30;
-    --gold-glow:  rgba(180,130,20,0.25);
-    --emerald:    #d4ead8;
-    --cream:      #2a1f0f;
-    --muted:      rgba(42,31,15,0.55);
-    --glass-bg:   rgba(255,250,240,0.78);
-    --glass-edge: rgba(0,0,0,0.1);
-    --glass-top:  rgba(255,255,255,0.7);
+    --bg:         #eee8dc;
+    --gold-light: #7a4e00;
+    --gold:       #9a6200;
+    --gold-dim:   #b8820a;
+    --gold-glow:  rgba(154,98,0,0.2);
+    --emerald:    #c8e0cc;
+    --cream:      #1a1208;
+    --muted:      rgba(26,18,8,0.6);
+    --win:        #0a8a40;
+    --win-glow:   rgba(10,138,64,0.3);
+    --loss:       #bb1a2a;
+    --loss-glow:  rgba(187,26,42,0.3);
+    --glass-bg:   rgba(255,252,244,0.88);
+    --glass-edge: rgba(0,0,0,0.12);
+    --glass-top:  rgba(255,255,255,0.75);
   }
   body.light {
-    background-color: #f0ece4;
+    background-color: #eee8dc;
     background-image:
-      radial-gradient(ellipse 100% 55% at 50% -5%, rgba(100,160,80,0.2) 0%, transparent 65%),
-      radial-gradient(ellipse 60% 40% at 15% 90%, rgba(140,180,120,0.15) 0%, transparent 60%),
-      repeating-linear-gradient( 45deg, rgba(0,0,0,0.018) 0, rgba(0,0,0,0.018) 1px, transparent 1px, transparent 6px),
-      repeating-linear-gradient(-45deg, rgba(0,0,0,0.018) 0, rgba(0,0,0,0.018) 1px, transparent 1px, transparent 6px);
+      radial-gradient(ellipse 100% 55% at 50% -5%, rgba(60,120,50,0.18) 0%, transparent 65%),
+      radial-gradient(ellipse 60% 40% at 15% 90%, rgba(80,140,60,0.12) 0%, transparent 60%),
+      repeating-linear-gradient( 45deg, rgba(0,0,0,0.022) 0, rgba(0,0,0,0.022) 1px, transparent 1px, transparent 6px),
+      repeating-linear-gradient(-45deg, rgba(0,0,0,0.022) 0, rgba(0,0,0,0.022) 1px, transparent 1px, transparent 6px);
   }
   body.light header h1 {
-    background: linear-gradient(170deg, #c88000 0%, #8a5200 45%, #5c3000 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    filter: drop-shadow(0 2px 14px rgba(180,120,0,0.35));
+    background: linear-gradient(170deg, #b87000 0%, #7a4400 45%, #4a2800 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    filter: drop-shadow(0 2px 10px rgba(160,100,0,0.3));
   }
-  body.light .playing-card { color: #1a1a1a; background: #fff; border-color: rgba(0,0,0,0.12); }
-  body.light .card-placeholder { background: rgba(0,0,0,0.06); border-color: rgba(0,0,0,0.15); color: rgba(0,0,0,0.25); }
-  body.light .odds-bar { background: rgba(240,235,220,0.95); border-color: rgba(180,130,0,0.35); }
-  body.light .pos-help-panel { background: rgba(0,0,0,0.04); }
+  /* panel & section overrides */
+  body.light .glass {
+    box-shadow: 0 2px 20px rgba(0,0,0,0.1), 0 1px 0 rgba(255,255,255,0.8) inset;
+  }
+  body.light .section-title { color: var(--gold); opacity: 1; }
+  body.light .section-title::before { background: var(--gold); }
+  /* cards */
+  body.light .playing-card { color: #111; background: #fff; border-color: rgba(0,0,0,0.15); box-shadow: 0 2px 8px rgba(0,0,0,0.12); }
+  body.light .playing-card .suit.red,
+  body.light .playing-card .rank { color: #cc1122; }
+  body.light .playing-card .suit.black { color: #111; }
+  body.light .card-placeholder { background: rgba(0,0,0,0.07); border-color: rgba(0,0,0,0.2); color: rgba(0,0,0,0.3); }
+  /* buttons */
+  body.light .btn { background: rgba(154,98,0,0.1); border-color: rgba(154,98,0,0.35); color: var(--gold); }
+  body.light .btn:hover:not(:disabled) { background: rgba(154,98,0,0.2); }
+  body.light .stepper-btn { color: var(--gold); border-color: rgba(154,98,0,0.35); }
+  body.light .pos-btn { background: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.15); color: rgba(26,18,8,0.7); }
+  body.light .pos-btn.selected { background: rgba(154,98,0,0.15); border-color: rgba(154,98,0,0.55); color: var(--gold); }
+  /* labels & text */
+  body.light .preflop-label { color: var(--gold); opacity: 1; }
+  body.light .collapsible-header { color: var(--cream); }
+  body.light .collapsible-toggle { color: var(--gold); }
+  body.light .input-group label { color: var(--gold); }
+  body.light .input-group input { background: rgba(0,0,0,0.06); border-color: rgba(0,0,0,0.18); color: var(--cream); }
+  body.light .pot-odds-row { border-color: rgba(0,0,0,0.08); }
+  body.light .tier-premium  { background: rgba(31,180,90,0.15);  color: #0a7a30; border-color: rgba(31,180,90,0.4); }
+  body.light .tier-strong   { background: rgba(50,140,220,0.15); color: #1855a0; border-color: rgba(50,140,220,0.4); }
+  body.light .tier-playable { background: rgba(180,140,20,0.15); color: #7a5a00; border-color: rgba(180,140,20,0.4); }
+  body.light .tier-marginal { background: rgba(200,90,20,0.15);  color: #a04010; border-color: rgba(200,90,20,0.4); }
+  body.light .tier-fold     { background: rgba(190,20,40,0.12);  color: #880020; border-color: rgba(190,20,40,0.35); }
+  body.light .pos-action    { filter: brightness(0.82) saturate(1.2); }
+  /* sparkline */
+  body.light .sparkline-dot { stroke: var(--gold); }
+  /* odds bar */
+  body.light .odds-bar { background: rgba(248,244,234,0.97); border-color: rgba(154,98,0,0.3); box-shadow: 0 -4px 20px rgba(0,0,0,0.1); }
+  body.light .odds-bar-divider { background: rgba(0,0,0,0.1); }
+  body.light .odds-bar-street { background: rgba(154,98,0,0.1); border-color: rgba(154,98,0,0.25); }
+  body.light .odds-bar-hand { background: linear-gradient(135deg,#9a6200,#5a3000); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+  /* odds cards */
+  body.light .odds-card { background: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.1); }
+  body.light .win-color  { color: var(--win); }
+  body.light .loss-color { color: var(--loss); }
+  /* pos help */
+  body.light .pos-help-panel { background: rgba(0,0,0,0.04); border-color: rgba(154,98,0,0.25); }
+  body.light .pos-help-row { border-color: rgba(0,0,0,0.07); }
+  body.light .pos-help-val { color: rgba(26,18,8,0.65); }
+  /* rank chart */
+  body.light .rank-row { border-color: rgba(0,0,0,0.07); }
+  body.light .rank-row:hover { background: rgba(0,0,0,0.04); }
+  body.light .rank-example .r { color: #cc1122; }
+  body.light .rank-example .b { color: #111; }
 
   /* ── THEME TOGGLE ── */
   .theme-toggle {
