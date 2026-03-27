@@ -939,7 +939,6 @@
         <svg id="sparkline-svg" width="100%" height="90" style="overflow:visible;display:block"></svg>
       </div>
     </div>
-    <div class="calculating hidden" id="calculating-msg">Calculating odds...</div>
   </div>
 
   <!-- Pot Odds -->
@@ -1490,7 +1489,6 @@ function scheduleCalc() {
   }
   document.getElementById('odds-section').style.display = 'block';
   document.getElementById('pot-odds-section').style.display = 'block';
-  document.getElementById('calculating-msg').classList.remove('hidden');
 
   clearTimeout(calcTimeout);
   calcTimeout = setTimeout(() => {
@@ -1503,7 +1501,6 @@ function scheduleCalc() {
 }
 
 function displayOdds(result, label, outs, streetLabel) {
-  document.getElementById('calculating-msg').classList.add('hidden');
 
   // Splits (chops) go to the player, so fold into win display
   const displayWin = result.win + result.tie;
