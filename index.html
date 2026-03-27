@@ -696,6 +696,45 @@
     </div>
   </div>
 
+  <!-- Preflop GTO — lives right under hole cards -->
+  <div class="section glass collapsible-section" id="preflop-section">
+    <div class="section-title collapsible-header" onclick="toggleSection('preflop')">
+      PREFLOP GUIDE
+      <span class="collapse-arrow" id="preflop-arrow">▾</span>
+    </div>
+    <div class="collapsible-body" id="preflop-body">
+      <div id="preflop-tier-wrap" style="margin-bottom:1.2rem">
+        <div class="preflop-label">HAND STRENGTH</div>
+        <div id="preflop-tier-result" class="tier-empty">Select your hole cards first</div>
+      </div>
+      <div class="preflop-label" style="margin-bottom:0.6rem">YOUR POSITION</div>
+      <div class="position-row" id="position-row">
+        <button class="pos-btn" data-pos="UTG"  onclick="selectPosition(this)">UTG</button>
+        <button class="pos-btn" data-pos="MP"   onclick="selectPosition(this)">MP</button>
+        <button class="pos-btn" data-pos="HJ"   onclick="selectPosition(this)">HJ</button>
+        <button class="pos-btn" data-pos="CO"   onclick="selectPosition(this)">CO</button>
+        <button class="pos-btn" data-pos="BTN"  onclick="selectPosition(this)">BTN</button>
+        <button class="pos-btn" data-pos="SB"   onclick="selectPosition(this)">SB</button>
+        <button class="pos-btn" data-pos="BB"   onclick="selectPosition(this)">BB</button>
+      </div>
+      <div id="position-action" class="pos-action-empty">Select a position</div>
+      <div style="margin-top:1.2rem">
+        <div class="preflop-label" style="margin-bottom:0.5rem">YOUR RAISE SIZE</div>
+        <div style="display:flex;align-items:center;gap:0.6rem;flex-wrap:wrap">
+          <div class="input-group">
+            <label>BIG BLINDS</label>
+            <input type="number" id="raise-size-bb" placeholder="2.5" min="1" step="0.5" oninput="updateRaiseDisplay()">
+          </div>
+          <div class="input-group">
+            <label>BB SIZE ($)</label>
+            <input type="number" id="bb-dollar" placeholder="2" min="0.01" step="0.5" oninput="updateRaiseDisplay()">
+          </div>
+          <div id="raise-dollar-result" class="pot-result neutral" style="margin-top:1rem">Enter amounts</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
 
   <!-- Community Cards -->
   <div class="section glass">
@@ -791,46 +830,6 @@
     </div>
     <div class="collapsible-body" id="rankings-body">
       <table class="rankings-table" id="rankings-table"></table>
-    </div>
-  </div>
-
-  <!-- Preflop GTO -->
-  <div class="section glass collapsible-section" id="preflop-section">
-    <div class="section-title collapsible-header" onclick="toggleSection('preflop')">
-      PREFLOP GUIDE
-      <span class="collapse-arrow" id="preflop-arrow">▾</span>
-    </div>
-    <div class="collapsible-body" id="preflop-body">
-      <div id="preflop-tier-wrap" style="margin-bottom:1.2rem">
-        <div class="preflop-label">HAND STRENGTH</div>
-        <div id="preflop-tier-result" class="tier-empty">Select your hole cards first</div>
-      </div>
-      <div class="preflop-label" style="margin-bottom:0.6rem">YOUR POSITION</div>
-      <div class="position-row" id="position-row">
-        <button class="pos-btn" data-pos="UTG"  onclick="selectPosition(this)">UTG</button>
-        <button class="pos-btn" data-pos="MP"   onclick="selectPosition(this)">MP</button>
-        <button class="pos-btn" data-pos="HJ"   onclick="selectPosition(this)">HJ</button>
-        <button class="pos-btn" data-pos="CO"   onclick="selectPosition(this)">CO</button>
-        <button class="pos-btn" data-pos="BTN"  onclick="selectPosition(this)">BTN</button>
-        <button class="pos-btn" data-pos="SB"   onclick="selectPosition(this)">SB</button>
-        <button class="pos-btn" data-pos="BB"   onclick="selectPosition(this)">BB</button>
-      </div>
-      <div id="position-action" class="pos-action-empty">Select a position</div>
-
-      <div style="margin-top:1.2rem">
-        <div class="preflop-label" style="margin-bottom:0.5rem">YOUR RAISE SIZE</div>
-        <div style="display:flex;align-items:center;gap:0.6rem;flex-wrap:wrap">
-          <div class="input-group">
-            <label>BIG BLINDS</label>
-            <input type="number" id="raise-size-bb" placeholder="2.5" min="1" step="0.5" oninput="updateRaiseDisplay()">
-          </div>
-          <div class="input-group">
-            <label>BB SIZE ($)</label>
-            <input type="number" id="bb-dollar" placeholder="2" min="0.01" step="0.5" oninput="updateRaiseDisplay()">
-          </div>
-          <div id="raise-dollar-result" class="pot-result neutral" style="margin-top:1rem">Enter amounts</div>
-        </div>
-      </div>
     </div>
   </div>
 
