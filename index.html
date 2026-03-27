@@ -408,6 +408,21 @@
   .odds-section { text-align: center; }
 
 
+  /* ── STREET BADGE ── */
+  .street-badge {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.14em;
+    padding: 0.18rem 0.55rem;
+    border-radius: 20px;
+    background: rgba(212,168,32,0.15);
+    border: 1px solid rgba(212,168,32,0.3);
+    color: var(--gold);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .street-badge.visible { opacity: 1; }
+
   /* ── ODDS CARDS ── */
   .odds-cards {
     display: grid;
@@ -461,6 +476,29 @@
     -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
     filter: drop-shadow(0 0 10px rgba(232,51,74,0.3));
   }
+
+  /* ── DELTA ── */
+  .odds-delta {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    min-height: 1.1rem;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .odds-delta.visible { opacity: 1; }
+  .odds-delta.up   { color: #1fdb6e; }
+  .odds-delta.down { color: #e8334a; }
+  .odds-delta.flat { color: var(--muted); }
+
+  /* Flash the card when odds update */
+  @keyframes oddsFlash {
+    0%   { transform: scale(1);    box-shadow: inherit; }
+    30%  { transform: scale(1.04); box-shadow: 0 0 28px var(--flash-color, rgba(31,219,110,0.6)); }
+    100% { transform: scale(1);    box-shadow: inherit; }
+  }
+  .odds-card-win.flash  { --flash-color: rgba(31,219,110,0.55); animation: oddsFlash 0.5s cubic-bezier(.2,.8,.2,1); }
+  .odds-card-loss.flash { --flash-color: rgba(232,51,74,0.55);  animation: oddsFlash 0.5s cubic-bezier(.2,.8,.2,1); }
 
   .hand-label {
     font-family: 'Playfair Display', serif;
@@ -778,16 +816,21 @@
 
   <!-- Odds Display -->
   <div class="section glass odds-section" id="odds-section" style="display:none">
-    <div class="section-title">Odds</div>
+    <div class="section-title">
+      Odds
+      <span class="street-badge" id="street-badge"></span>
+    </div>
     <div id="odds-content">
       <div class="odds-cards">
         <div class="odds-card odds-card-win">
           <div class="odds-card-label">WIN</div>
           <div class="odds-card-num" id="win-pct">—</div>
+          <div class="odds-delta" id="delta-win"></div>
         </div>
         <div class="odds-card odds-card-loss">
           <div class="odds-card-label">LOSS</div>
           <div class="odds-card-num" id="loss-pct">—</div>
+          <div class="odds-delta" id="delta-loss"></div>
         </div>
       </div>
       <div class="players-inline">
@@ -854,6 +897,7 @@ let pickerRank = null;
 let pickerSuit = null;
 let calcTimeout = null;
 let equityHistory = []; // [{label, pct}]
+let prevWinPct = null;  // track previous win% for delta display
 
 const RANKS = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
 const SUITS = ['spades','hearts','diamonds','clubs'];
@@ -1078,6 +1122,7 @@ function adjustPlayers(delta) {
 function resetHole() {
   holeCards = [];
   equityHistory = [];
+  prevWinPct = null;
   renderAll();
   scheduleCalc();
 }
@@ -1096,9 +1141,13 @@ function resetAll() {
   holeCards = [];
   community = { flop: [], turn: [], river: [] };
   equityHistory = [];
+  prevWinPct = null;
   document.getElementById('odds-section').style.display = 'none';
   document.getElementById('pot-odds-section').style.display = 'none';
   document.getElementById('sparkline-wrap').style.display = 'none';
+  document.getElementById('street-badge').className = 'street-badge';
+  document.getElementById('delta-win').className = 'odds-delta';
+  document.getElementById('delta-loss').className = 'odds-delta';
   renderAll();
 }
 
@@ -1342,8 +1391,39 @@ function displayOdds(result, label, outs, streetLabel) {
 
   // Splits (chops) go to the player, so fold into win display
   const displayWin = result.win + result.tie;
-  document.getElementById('win-pct').textContent  = displayWin.toFixed(1)  + '%';
+  document.getElementById('win-pct').textContent  = displayWin.toFixed(1) + '%';
   document.getElementById('loss-pct').textContent = result.loss.toFixed(1) + '%';
+
+  // Street badge
+  const badge = document.getElementById('street-badge');
+  badge.textContent = streetLabel.toUpperCase();
+  badge.className = 'street-badge visible';
+
+  // Delta vs previous street
+  const dWin  = document.getElementById('delta-win');
+  const dLoss = document.getElementById('delta-loss');
+  if (prevWinPct !== null) {
+    const diff = displayWin - prevWinPct;
+    const sign = diff > 0 ? '▲ +' : diff < 0 ? '▼ ' : '— ';
+    const cls  = diff > 0.4 ? 'up' : diff < -0.4 ? 'down' : 'flat';
+    dWin.textContent  = sign + Math.abs(diff).toFixed(1) + '%';
+    dWin.className    = `odds-delta visible ${cls}`;
+    dLoss.textContent = (diff > 0.4 ? '▼ -' : diff < -0.4 ? '▲ +' : '— ') + Math.abs(diff).toFixed(1) + '%';
+    dLoss.className   = `odds-delta visible ${diff > 0.4 ? 'down' : diff < -0.4 ? 'up' : 'flat'}`;
+
+    // Flash the cards
+    const winCard  = document.querySelector('.odds-card-win');
+    const lossCard = document.querySelector('.odds-card-loss');
+    winCard.classList.remove('flash');
+    lossCard.classList.remove('flash');
+    void winCard.offsetWidth;
+    winCard.classList.add('flash');
+    lossCard.classList.add('flash');
+  } else {
+    dWin.className  = 'odds-delta';
+    dLoss.className = 'odds-delta';
+  }
+  prevWinPct = displayWin;
 
   document.getElementById('hand-label').textContent = label;
   document.getElementById('outs-info').textContent = outs > 0 ? `${outs} out${outs!==1?'s':''} to improve` : '';
