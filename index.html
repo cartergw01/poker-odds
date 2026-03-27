@@ -1,0 +1,1326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Poker Odds Calculator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #030806;
+    --gold-light: #f5d97a;
+    --gold:       #d4a820;
+    --gold-dim:   #8a6510;
+    --gold-glow:  rgba(212,168,32,0.35);
+    --emerald:    #0d2a1a;
+    --cream:      #f0e8d8;
+    --muted:      rgba(240,232,216,0.45);
+    --red:        #d42b3a;
+    --black:      #0a0a0a;
+    --win:        #1fdb6e;
+    --win-glow:   rgba(31,219,110,0.4);
+    --loss:       #e8334a;
+    --loss-glow:  rgba(232,51,74,0.4);
+    --tie:        #e8a020;
+    --glass-bg:   rgba(6,18,10,0.72);
+    --glass-edge: rgba(255,255,255,0.09);
+    --glass-top:  rgba(255,255,255,0.16);
+  }
+
+  /* ── BASE ── */
+  body {
+    background: var(--bg);
+    color: var(--cream);
+    font-family: 'IBM Plex Mono', monospace;
+    min-height: 100vh;
+    overflow-x: hidden;
+    /* Deep casino lighting: overhead spot + ambient */
+    background-image:
+      radial-gradient(ellipse 100% 55% at 50% -5%,  rgba(18,90,45,0.55) 0%, transparent 65%),
+      radial-gradient(ellipse 60%  40% at 15% 90%,  rgba(8,40,20,0.4)   0%, transparent 60%),
+      radial-gradient(ellipse 50%  35% at 90% 85%,  rgba(8,40,20,0.35)  0%, transparent 55%);
+    /* Felt weave — tight diagonal crosshatch */
+    background-image:
+      radial-gradient(ellipse 100% 55% at 50% -5%,  rgba(18,90,45,0.55) 0%, transparent 65%),
+      radial-gradient(ellipse 60%  40% at 15% 90%,  rgba(8,40,20,0.4)   0%, transparent 60%),
+      radial-gradient(ellipse 50%  35% at 90% 85%,  rgba(8,40,20,0.35)  0%, transparent 55%),
+      repeating-linear-gradient( 45deg, rgba(255,255,255,0.022) 0, rgba(255,255,255,0.022) 1px, transparent 1px, transparent 6px),
+      repeating-linear-gradient(-45deg, rgba(255,255,255,0.022) 0, rgba(255,255,255,0.022) 1px, transparent 1px, transparent 6px);
+  }
+
+  h1, h2, h3 { font-family: 'Playfair Display', serif; }
+
+  /* ── GLASS PANEL ── */
+  .glass {
+    background: var(--glass-bg);
+    backdrop-filter: blur(32px) saturate(160%);
+    -webkit-backdrop-filter: blur(32px) saturate(160%);
+    border: 1px solid var(--glass-edge);
+    border-top-color: var(--glass-top);
+    box-shadow:
+      0 0 0 1px rgba(0,0,0,0.5),
+      0 8px 40px rgba(0,0,0,0.55),
+      inset 0 1px 0 var(--glass-top);
+  }
+
+  /* ── LAYOUT ── */
+  .app { max-width: 860px; margin: 0 auto; padding: 1.5rem 1rem 5rem; }
+
+  /* ── HEADER ── */
+  header {
+    text-align: center;
+    padding: 2.5rem 0 2rem;
+    margin-bottom: 1.8rem;
+    position: relative;
+  }
+  header::after {
+    content: '';
+    display: block;
+    height: 1px;
+    background: linear-gradient(90deg, transparent 0%, var(--gold-dim) 30%, var(--gold) 50%, var(--gold-dim) 70%, transparent 100%);
+    margin-top: 2rem;
+    opacity: 0.6;
+  }
+  .header-eyebrow {
+    font-size: 0.65rem;
+    letter-spacing: 0.32em;
+    color: var(--gold);
+    opacity: 0.7;
+    text-transform: uppercase;
+    margin-bottom: 0.6rem;
+  }
+  header h1 {
+    font-size: 2.8rem;
+    letter-spacing: 0.06em;
+    background: linear-gradient(170deg, #ffe98a 0%, #d4a820 45%, #a87010 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 2px 24px rgba(212,168,32,0.5));
+    line-height: 1.05;
+  }
+  header .sub {
+    color: var(--muted);
+    font-size: 0.68rem;
+    letter-spacing: 0.22em;
+    margin-top: 0.6rem;
+  }
+
+  /* ── SECTION ── */
+  .section {
+    border-radius: 18px;
+    padding: 1.5rem 1.4rem;
+    margin-bottom: 1.1rem;
+  }
+  .section-title {
+    font-size: 0.62rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--gold);
+    opacity: 0.65;
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    margin-bottom: 1.2rem;
+  }
+  .section-title::before {
+    content: '';
+    width: 3px; height: 10px;
+    background: var(--gold);
+    border-radius: 2px;
+    opacity: 0.8;
+  }
+  .section-title::after {
+    content: '';
+    flex: 1; height: 1px;
+    background: linear-gradient(90deg, rgba(212,168,32,0.25), transparent);
+  }
+
+  /* ── BUTTONS ── */
+  .btn {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.06em;
+    padding: 0.55rem 1.1rem;
+    border-radius: 10px;
+    border: 1px solid rgba(212,168,32,0.3);
+    background: rgba(212,168,32,0.07);
+    color: var(--gold-light);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.06);
+  }
+  .btn:hover:not(:disabled) {
+    background: rgba(212,168,32,0.16);
+    border-color: rgba(212,168,32,0.6);
+    box-shadow: 0 4px 18px var(--gold-glow), inset 0 1px 0 rgba(255,255,255,0.1);
+    transform: translateY(-1px);
+  }
+  .btn.primary {
+    background: linear-gradient(145deg, #e8c030 0%, #b88010 100%);
+    color: #0a0800;
+    border-color: #d4a820;
+    font-weight: 700;
+    box-shadow: 0 4px 20px rgba(212,168,32,0.45), inset 0 1px 0 rgba(255,240,120,0.35);
+  }
+  .btn.primary:hover:not(:disabled) {
+    background: linear-gradient(145deg, #f5d040 0%, #c89020 100%);
+    box-shadow: 0 6px 28px rgba(212,168,32,0.65), inset 0 1px 0 rgba(255,245,140,0.4);
+    transform: translateY(-2px);
+  }
+  .btn.ghost {
+    background: rgba(255,255,255,0.04);
+    border-color: rgba(255,255,255,0.12);
+    color: var(--muted);
+  }
+  .btn.ghost:hover:not(:disabled) {
+    background: rgba(255,255,255,0.09);
+    border-color: rgba(255,255,255,0.22);
+    color: var(--cream);
+    box-shadow: 0 4px 14px rgba(0,0,0,0.3);
+  }
+  .btn.danger {
+    background: rgba(232,51,74,0.08);
+    border-color: rgba(232,51,74,0.3);
+    color: #ff8090;
+  }
+  .btn.danger:hover:not(:disabled) {
+    background: rgba(232,51,74,0.18);
+    border-color: rgba(232,51,74,0.55);
+    box-shadow: 0 4px 16px var(--loss-glow);
+  }
+  .btn:disabled { opacity: 0.3; cursor: not-allowed; transform: none !important; }
+
+  /* ── PLAYING CARDS ── */
+  .card-row { display: flex; flex-wrap: wrap; gap: 0.7rem; align-items: flex-end; }
+
+  .playing-card {
+    width: 62px; height: 92px;
+    background: linear-gradient(160deg, #ffffff 0%, #f8f4ec 60%, #ede8de 100%);
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.95);
+    box-shadow:
+      0 6px 20px rgba(0,0,0,0.6),
+      0 1px  4px rgba(0,0,0,0.4),
+      inset 0 1px 0 #ffffff,
+      inset 0 -1px 0 rgba(0,0,0,0.06);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    position: relative;
+    transition: transform 0.2s cubic-bezier(.2,.8,.2,1), box-shadow 0.2s ease;
+    cursor: default;
+    font-family: 'Playfair Display', serif;
+  }
+  .playing-card:hover {
+    transform: translateY(-7px) scale(1.06) rotate(-1deg);
+    box-shadow: 0 18px 40px rgba(0,0,0,0.75), 0 4px 8px rgba(0,0,0,0.4), inset 0 1px 0 #fff;
+  }
+  .playing-card .rank   { font-size: 1.35rem; font-weight: 700; line-height: 1; }
+  .playing-card .suit-sym { font-size: 1.05rem; line-height: 1; margin-top: 1px; }
+  .playing-card.red   { color: var(--red); }
+  .playing-card.black { color: #111; }
+  .playing-card .corner {
+    position: absolute; top: 4px; left: 5px;
+    font-size: 0.6rem; line-height: 1.15;
+    font-family: 'Playfair Display', serif;
+  }
+  .playing-card .corner-bot {
+    position: absolute; bottom: 4px; right: 5px;
+    font-size: 0.6rem; line-height: 1.15;
+    transform: rotate(180deg);
+    font-family: 'Playfair Display', serif;
+  }
+  .playing-card .remove-card {
+    position: absolute; top: -7px; right: -7px;
+    width: 20px; height: 20px;
+    background: linear-gradient(135deg, #ff4060, #c02030);
+    border-radius: 50%; border: 1.5px solid rgba(255,255,255,0.5);
+    cursor: pointer; font-size: 9px; color: white;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; transition: opacity 0.15s;
+    z-index: 10;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+  }
+  .playing-card:hover .remove-card { opacity: 1; }
+
+  .card-placeholder {
+    width: 62px; height: 92px;
+    border: 1.5px dashed rgba(212,168,32,0.2);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    color: rgba(212,168,32,0.2);
+    font-size: 1.3rem;
+    background: rgba(255,255,255,0.02);
+  }
+
+  /* ── MODALS ── */
+  .modal-overlay {
+    position: fixed; inset: 0; z-index: 990;
+    background: rgba(0,0,0,0.82);
+    display: flex; align-items: center; justify-content: center;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+  .modal-overlay.hidden { display: none; }
+
+  /* API modal */
+  #api-modal { z-index: 1000; }
+  .modal-box {
+    border-radius: 20px;
+    padding: 2.2rem;
+    max-width: 420px; width: 92%;
+  }
+  .modal-box h2 {
+    font-size: 1.5rem;
+    background: linear-gradient(135deg, #f5d97a, #d4a820);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    margin-bottom: 0.5rem;
+  }
+  .modal-box p {
+    color: var(--muted); font-size: 0.78rem; line-height: 1.7; margin-bottom: 1.4rem;
+  }
+  .modal-box input {
+    width: 100%;
+    background: rgba(0,0,0,0.4);
+    border: 1px solid rgba(212,168,32,0.25);
+    border-radius: 10px;
+    color: var(--cream);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.85rem;
+    padding: 0.7rem 0.9rem;
+    margin-bottom: 1.1rem;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .modal-box input:focus { border-color: rgba(212,168,32,0.6); }
+
+  /* Picker modal */
+  #picker-modal { z-index: 999; }
+  .picker-box {
+    border-radius: 20px;
+    padding: 1.6rem;
+    max-width: 370px; width: 94%;
+  }
+  .picker-box h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.15rem;
+    color: var(--gold-light);
+    margin-bottom: 1.1rem;
+    letter-spacing: 0.02em;
+  }
+  .picker-ranks, .picker-suits {
+    display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 1rem;
+  }
+  .rank-btn, .suit-btn {
+    width: 44px; height: 44px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    color: var(--cream);
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .rank-btn:hover:not(:disabled), .suit-btn:hover:not(:disabled) {
+    border-color: rgba(212,168,32,0.5);
+    color: var(--gold-light);
+    background: rgba(212,168,32,0.1);
+    transform: scale(1.06);
+  }
+  .rank-btn.selected, .suit-btn.selected {
+    background: linear-gradient(145deg, #e8c030, #b08010);
+    color: #0a0800;
+    border-color: var(--gold);
+    box-shadow: 0 0 16px rgba(212,168,32,0.5);
+    transform: scale(1.06);
+  }
+  .rank-btn:disabled, .suit-btn:disabled { opacity: 0.2; cursor: not-allowed; }
+  .suit-btn.hearts, .suit-btn.diamonds { color: var(--red); }
+  .suit-btn.hearts.selected, .suit-btn.diamonds.selected { color: #1a0000; }
+  .picker-actions { display: flex; gap: 0.6rem; justify-content: flex-end; margin-top: 0.4rem; }
+
+  /* Camera modal */
+  #camera-modal {
+    position: fixed; inset: 0; z-index: 998;
+    background: rgba(0,0,0,0.92);
+    display: flex; align-items: center; justify-content: center;
+    flex-direction: column; gap: 1.1rem;
+  }
+  #camera-modal.hidden { display: none; }
+  #camera-video {
+    max-width: 100%; width: 340px;
+    border-radius: 14px;
+    border: 1.5px solid rgba(212,168,32,0.4);
+    box-shadow: 0 0 0 1px rgba(0,0,0,0.6), 0 8px 40px rgba(0,0,0,0.7);
+  }
+  #camera-canvas { display: none; }
+  .camera-actions { display: flex; gap: 0.8rem; }
+
+  /* ── PLAYERS ── */
+  .players-row { display: flex; align-items: center; gap: 1.2rem; flex-wrap: wrap; }
+  .players-row label { color: var(--muted); font-size: 0.76rem; letter-spacing: 0.04em; }
+  .player-stepper { display: flex; align-items: center; gap: 0.8rem; }
+  .stepper-btn {
+    width: 36px; height: 36px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 10px; color: var(--cream);
+    font-size: 1.2rem; cursor: pointer;
+    transition: all 0.18s;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+  }
+  .stepper-btn:hover {
+    border-color: rgba(212,168,32,0.5);
+    background: rgba(212,168,32,0.1);
+    color: var(--gold-light);
+  }
+  .stepper-val {
+    font-size: 1.5rem; color: var(--gold-light);
+    font-family: 'Playfair Display', serif;
+    min-width: 28px; text-align: center;
+    filter: drop-shadow(0 0 8px var(--gold-glow));
+  }
+
+  /* ── COMMUNITY STAGES ── */
+  .stage-row {
+    display: flex; align-items: center; gap: 0.8rem;
+    margin-bottom: 1rem; flex-wrap: wrap;
+  }
+  .stage-label {
+    font-size: 0.62rem; letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--gold); opacity: 0.55;
+    min-width: 42px;
+  }
+  .stage-actions { display: flex; gap: 0.35rem; flex-wrap: wrap; }
+
+  /* ── ODDS DISPLAY ── */
+  .odds-section { text-align: center; }
+
+  .win-pct {
+    font-family: 'Playfair Display', serif;
+    font-size: 6rem;
+    line-height: 1;
+    display: block;
+    background: linear-gradient(160deg, #80ffb8 0%, #1fdb6e 45%, #0aa845 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    filter: drop-shadow(0 0 28px rgba(31,219,110,0.55));
+    transition: filter 0.4s, background 0.4s;
+  }
+  .win-pct.caution {
+    background: linear-gradient(160deg, #ffe590 0%, #e8a020 45%, #b87010 100%);
+    filter: drop-shadow(0 0 28px rgba(232,160,32,0.55));
+  }
+  .win-pct.danger {
+    background: linear-gradient(160deg, #ff9aaa 0%, #e8334a 45%, #a81a28 100%);
+    filter: drop-shadow(0 0 28px rgba(232,51,74,0.55));
+  }
+
+  .win-label {
+    font-size: 0.62rem; letter-spacing: 0.28em;
+    color: var(--muted); margin-top: 0.3rem; margin-bottom: 1.5rem;
+    text-transform: uppercase;
+  }
+
+  /* Arc / bar */
+  .bars-wrap { margin: 0 auto 0.5rem; max-width: 380px; }
+  .bars-row {
+    display: flex; height: 10px; border-radius: 6px; overflow: hidden;
+    background: rgba(0,0,0,0.5);
+    box-shadow: inset 0 2px 8px rgba(0,0,0,0.6), 0 0 0 1px rgba(0,0,0,0.3);
+  }
+  .bar-win  { background: linear-gradient(90deg,#1fdb6e,#0aa845); transition: width 0.7s cubic-bezier(.4,0,.2,1); }
+  .bar-tie  { background: linear-gradient(90deg,#e8a020,#c07010); transition: width 0.7s cubic-bezier(.4,0,.2,1); }
+  .bar-loss { background: linear-gradient(90deg,#e8334a,#a81a28); transition: width 0.7s cubic-bezier(.4,0,.2,1); }
+
+  .bars-legend {
+    display: flex; justify-content: center; gap: 1.8rem;
+    font-size: 0.7rem; margin-top: 0.55rem; margin-bottom: 1.5rem;
+    color: var(--muted);
+  }
+  .legend-item { display: flex; align-items: center; gap: 0.35rem; }
+  .legend-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+
+  .hand-label {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    background: linear-gradient(135deg, #ffe590 0%, #d4a820 55%, #906010 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    filter: drop-shadow(0 1px 12px rgba(212,168,32,0.4));
+    margin-bottom: 0.3rem;
+    letter-spacing: 0.01em;
+  }
+  .outs-info { font-size: 0.73rem; color: var(--muted); letter-spacing: 0.04em; }
+
+  .stats-animate { animation: statsIn 0.4s cubic-bezier(.2,.8,.2,1); }
+  @keyframes statsIn {
+    from { opacity: 0; transform: translateY(10px) scale(0.98); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  /* ── POT ODDS ── */
+  .pot-odds-row { display: flex; gap: 0.9rem; flex-wrap: wrap; align-items: flex-end; margin-bottom: 0.9rem; }
+  .input-group { display: flex; flex-direction: column; gap: 0.35rem; }
+  .input-group label { font-size: 0.62rem; color: var(--muted); letter-spacing: 0.12em; text-transform: uppercase; }
+  .input-group input {
+    background: rgba(0,0,0,0.4);
+    border: 1px solid rgba(212,168,32,0.2);
+    border-radius: 10px; color: var(--cream);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.88rem;
+    padding: 0.5rem 0.75rem; width: 120px; outline: none;
+    transition: border-color 0.2s;
+  }
+  .input-group input:focus { border-color: rgba(212,168,32,0.55); }
+  .pot-result {
+    font-size: 0.8rem; padding: 0.6rem 1rem; border-radius: 10px;
+    font-weight: 600; transition: all 0.3s; letter-spacing: 0.03em;
+  }
+  .pot-result.profitable   { background: rgba(31,219,110,0.1);  color: #1fdb6e; border: 1px solid rgba(31,219,110,0.35); }
+  .pot-result.unprofitable { background: rgba(232,51,74,0.1);   color: #ff7085; border: 1px solid rgba(232,51,74,0.35);  }
+  .pot-result.neutral      { background: rgba(255,255,255,0.04); color: var(--muted); border: 1px solid rgba(255,255,255,0.1); }
+
+  /* ── MISC ── */
+  .scan-status { font-size: 0.72rem; color: var(--muted); margin-top: 0.6rem; min-height: 1rem; }
+  .scan-status.error   { color: #ff7085; }
+  .scan-status.success { color: var(--win); }
+  .flex-gap { display: flex; gap: 0.45rem; flex-wrap: wrap; }
+  .calculating { color: var(--gold); font-size: 0.72rem; animation: pulse 1.2s infinite; }
+  @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.35; } }
+
+  @media (max-width: 480px) {
+    header h1 { font-size: 2rem; }
+    .win-pct  { font-size: 4.5rem; }
+    .playing-card { width: 54px; height: 80px; }
+    .playing-card .rank { font-size: 1.15rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- API Key Modal -->
+<div id="api-modal" class="modal-overlay">
+  <div class="modal-box glass">
+    <h2>Anthropic API Key</h2>
+    <p>Enter your Anthropic API key to enable card scanning via Claude Vision. It will be stored in localStorage on this device only.</p>
+    <input type="password" id="api-key-input" placeholder="sk-ant-..." autocomplete="off">
+    <div style="display:flex;gap:0.6rem">
+      <button class="btn primary" onclick="saveApiKey()">Save Key</button>
+      <button class="btn" onclick="skipApiKey()">Skip (Manual Only)</button>
+    </div>
+  </div>
+</div>
+
+<!-- Card Picker Modal -->
+<div id="picker-modal" class="modal-overlay hidden">
+  <div class="picker-box glass">
+    <h3>Select Card</h3>
+    <div class="picker-ranks" id="picker-ranks"></div>
+    <div class="picker-suits" id="picker-suits">
+      <button class="suit-btn spades" data-suit="spades" onclick="selectSuit(this)">♠</button>
+      <button class="suit-btn hearts" data-suit="hearts" onclick="selectSuit(this)">♥</button>
+      <button class="suit-btn diamonds" data-suit="diamonds" onclick="selectSuit(this)">♦</button>
+      <button class="suit-btn clubs" data-suit="clubs" onclick="selectSuit(this)">♣</button>
+    </div>
+    <div class="picker-actions">
+      <button class="btn" onclick="closePicker()">Cancel</button>
+      <button class="btn primary" id="picker-confirm" onclick="confirmPicker()" disabled>Add Card</button>
+    </div>
+  </div>
+</div>
+
+<!-- Camera Modal -->
+<div id="camera-modal" class="hidden">
+  <video id="camera-video" autoplay playsinline></video>
+  <canvas id="camera-canvas"></canvas>
+  <div class="camera-actions">
+    <button class="btn primary" onclick="capturePhoto()">📷 Capture</button>
+    <button class="btn danger" onclick="closeCamera()">Cancel</button>
+  </div>
+  <div id="camera-status" class="scan-status" style="color:var(--cream-dim);text-align:center"></div>
+</div>
+
+<div class="app">
+  <header>
+    <div class="header-eyebrow">Texas Hold'em</div>
+    <h1>Poker Odds</h1>
+    <div class="sub">made by Carter</div>
+  </header>
+
+  <!-- Hole Cards -->
+  <div class="section glass">
+    <div class="section-title">Your Hole Cards</div>
+    <div class="card-row" id="hole-cards-display">
+      <div class="card-placeholder">?</div>
+      <div class="card-placeholder">?</div>
+    </div>
+    <div style="margin-top:0.8rem" class="flex-gap">
+      <button class="btn primary" onclick="openCamera('hole')" id="scan-hole-btn">📷 Scan Cards</button>
+      <button class="btn" onclick="openPicker('hole')">＋ Pick Card</button>
+      <button class="btn danger" onclick="resetHole()">↺ Reset</button>
+    </div>
+    <div class="scan-status" id="hole-scan-status"></div>
+  </div>
+
+  <!-- Players -->
+  <div class="section glass">
+    <div class="section-title">Players at Table</div>
+    <div class="players-row">
+      <label>Number of players (including you):</label>
+      <div class="player-stepper">
+        <button class="stepper-btn" onclick="adjustPlayers(-1)">−</button>
+        <span class="stepper-val" id="players-val">4</span>
+        <button class="stepper-btn" onclick="adjustPlayers(1)">＋</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Community Cards -->
+  <div class="section glass">
+    <div class="section-title">Community Cards</div>
+
+    <div class="stage-row">
+      <span class="stage-label">FLOP</span>
+      <div class="card-row" id="flop-display">
+        <div class="card-placeholder">?</div>
+        <div class="card-placeholder">?</div>
+        <div class="card-placeholder">?</div>
+      </div>
+      <div class="stage-actions">
+        <button class="btn primary" onclick="openCamera('flop')" id="scan-flop-btn">📷</button>
+        <button class="btn" onclick="openPicker('flop')">＋</button>
+        <button class="btn danger" onclick="resetStage('flop')">↺</button>
+      </div>
+    </div>
+
+    <div class="stage-row">
+      <span class="stage-label">TURN</span>
+      <div class="card-row" id="turn-display">
+        <div class="card-placeholder">?</div>
+      </div>
+      <div class="stage-actions">
+        <button class="btn primary" onclick="openCamera('turn')" id="scan-turn-btn">📷</button>
+        <button class="btn" onclick="openPicker('turn')">＋</button>
+        <button class="btn danger" onclick="resetStage('turn')">↺</button>
+      </div>
+    </div>
+
+    <div class="stage-row">
+      <span class="stage-label">RIVER</span>
+      <div class="card-row" id="river-display">
+        <div class="card-placeholder">?</div>
+      </div>
+      <div class="stage-actions">
+        <button class="btn primary" onclick="openCamera('river')" id="scan-river-btn">📷</button>
+        <button class="btn" onclick="openPicker('river')">＋</button>
+        <button class="btn danger" onclick="resetStage('river')">↺</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Odds Display -->
+  <div class="section odds-section" id="odds-section" style="display:none">
+    <div class="section-title">Win Probability</div>
+    <div id="odds-content">
+      <div class="win-pct" id="win-pct">—</div>
+      <div class="win-label">WIN PROBABILITY</div>
+      <div class="bars-row">
+        <div class="bar-win" id="bar-win" style="width:0%"></div>
+        <div class="bar-tie" id="bar-tie" style="width:0%"></div>
+        <div class="bar-loss" id="bar-loss" style="width:100%"></div>
+      </div>
+      <div class="bars-legend">
+        <div class="legend-item"><div class="legend-dot" style="background:var(--win)"></div><span id="legend-win">Win 0%</span></div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--tie)"></div><span id="legend-tie">Tie 0%</span></div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--loss)"></div><span id="legend-loss">Loss 100%</span></div>
+      </div>
+      <div class="hand-label" id="hand-label">—</div>
+      <div class="outs-info" id="outs-info"></div>
+    </div>
+    <div class="calculating hidden" id="calculating-msg">Calculating odds...</div>
+  </div>
+
+  <!-- Pot Odds -->
+  <div class="section glass" id="pot-odds-section" style="display:none">
+    <div class="section-title">Pot Odds Helper</div>
+    <div class="pot-odds-row">
+      <div class="input-group">
+        <label>POT SIZE ($)</label>
+        <input type="number" id="pot-size" placeholder="100" min="0" oninput="calcPotOdds()">
+      </div>
+      <div class="input-group">
+        <label>CALL AMOUNT ($)</label>
+        <input type="number" id="call-amount" placeholder="20" min="0" oninput="calcPotOdds()">
+      </div>
+      <div class="pot-result neutral" id="pot-result">Enter amounts above</div>
+    </div>
+  </div>
+
+  <div style="text-align:center;margin-top:1.5rem">
+    <button class="btn ghost" onclick="showApiKeyModal()">⚙ API Key</button>
+    <button class="btn danger" onclick="resetAll()" style="margin-left:0.5rem">Reset All</button>
+  </div>
+
+  <div style="text-align:center;margin-top:3rem;padding-bottom:1rem;font-size:0.58rem;letter-spacing:0.12em;color:rgba(240,232,216,0.2)">
+    carter is better than belen
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════
+let apiKey = localStorage.getItem('anthropic_api_key') || '';
+let holeCards = [];
+let community = { flop: [], turn: [], river: [] };
+let numPlayers = 4;
+let pickerTarget = null;
+let pickerRank = null;
+let pickerSuit = null;
+let cameraTarget = null;
+let cameraStream = null;
+let calcTimeout = null;
+
+const RANKS = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
+const SUITS = ['spades','hearts','diamonds','clubs'];
+const SUIT_SYM = { spades:'♠', hearts:'♥', diamonds:'♦', clubs:'♣' };
+const RED_SUITS = new Set(['hearts','diamonds']);
+
+// ═══════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════
+window.addEventListener('load', () => {
+  if (!apiKey) {
+    document.getElementById('api-modal').classList.remove('hidden');
+  }
+  buildRankButtons();
+  renderAll();
+});
+
+function saveApiKey() {
+  const val = document.getElementById('api-key-input').value.trim();
+  if (!val) return;
+  apiKey = val;
+  localStorage.setItem('anthropic_api_key', apiKey);
+  document.getElementById('api-modal').classList.add('hidden');
+}
+
+function skipApiKey() {
+  document.getElementById('api-modal').classList.add('hidden');
+}
+
+function showApiKeyModal() {
+  document.getElementById('api-key-input').value = apiKey;
+  document.getElementById('api-modal').classList.remove('hidden');
+}
+
+// ═══════════════════════════════════════════════════
+//  CARD PICKER
+// ═══════════════════════════════════════════════════
+function buildRankButtons() {
+  const container = document.getElementById('picker-ranks');
+  RANKS.forEach(r => {
+    const btn = document.createElement('button');
+    btn.className = 'rank-btn';
+    btn.dataset.rank = r;
+    btn.textContent = r;
+    btn.onclick = () => selectRank(btn);
+    container.appendChild(btn);
+  });
+}
+
+function getAllSelectedCards() {
+  return [...holeCards, ...community.flop, ...community.turn, ...community.river];
+}
+
+function cardKey(c) { return c.rank + '_' + c.suit; }
+
+function openPicker(target) {
+  pickerTarget = target;
+  pickerRank = null;
+  pickerSuit = null;
+  const used = new Set(getAllSelectedCards().map(cardKey));
+
+  // Reset rank buttons
+  document.querySelectorAll('.rank-btn').forEach(btn => {
+    btn.classList.remove('selected');
+    btn.disabled = false;
+  });
+
+  // Disable suit buttons for used combos
+  document.querySelectorAll('.suit-btn').forEach(btn => {
+    btn.classList.remove('selected');
+    btn.disabled = false;
+  });
+
+  document.getElementById('picker-confirm').disabled = true;
+  document.getElementById('picker-modal').classList.remove('hidden');
+}
+
+function closePicker() {
+  document.getElementById('picker-modal').classList.add('hidden');
+  pickerTarget = null;
+  pickerRank = null;
+  pickerSuit = null;
+}
+
+function selectRank(btn) {
+  document.querySelectorAll('.rank-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  pickerRank = btn.dataset.rank;
+  pickerSuit = null;
+
+  // Disable suits that form used combos
+  const used = new Set(getAllSelectedCards().map(cardKey));
+  document.querySelectorAll('.suit-btn').forEach(sb => {
+    sb.classList.remove('selected');
+    const key = pickerRank + '_' + sb.dataset.suit;
+    sb.disabled = used.has(key);
+  });
+
+  document.getElementById('picker-confirm').disabled = true;
+}
+
+function selectSuit(btn) {
+  if (btn.disabled) return;
+  document.querySelectorAll('.suit-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  pickerSuit = btn.dataset.suit;
+  document.getElementById('picker-confirm').disabled = !(pickerRank && pickerSuit);
+}
+
+function getStageLimit(target) {
+  if (target === 'hole') return 2;
+  if (target === 'flop') return 3;
+  return 1;
+}
+
+function getStageCards(target) {
+  if (target === 'hole') return holeCards;
+  return community[target];
+}
+
+function confirmPicker() {
+  if (!pickerRank || !pickerSuit) return;
+  const cards = getStageCards(pickerTarget);
+  const limit = getStageLimit(pickerTarget);
+  if (cards.length >= limit) return;
+  cards.push({ rank: pickerRank, suit: pickerSuit });
+  closePicker();
+  renderAll();
+  scheduleCalc();
+}
+
+// ═══════════════════════════════════════════════════
+//  CAMERA & SCAN
+// ═══════════════════════════════════════════════════
+async function openCamera(target) {
+  if (!apiKey) {
+    alert('Please set your Anthropic API key first.');
+    showApiKeyModal();
+    return;
+  }
+  cameraTarget = target;
+  document.getElementById('camera-modal').classList.remove('hidden');
+  document.getElementById('camera-status').textContent = 'Starting camera...';
+  try {
+    cameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false });
+    document.getElementById('camera-video').srcObject = cameraStream;
+    document.getElementById('camera-status').textContent = 'Point camera at cards, then tap Capture.';
+  } catch(e) {
+    document.getElementById('camera-status').textContent = 'Camera error: ' + e.message;
+  }
+}
+
+function closeCamera() {
+  if (cameraStream) { cameraStream.getTracks().forEach(t => t.stop()); cameraStream = null; }
+  document.getElementById('camera-modal').classList.add('hidden');
+  cameraTarget = null;
+}
+
+async function capturePhoto() {
+  const video = document.getElementById('camera-video');
+  const canvas = document.getElementById('camera-canvas');
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  canvas.getContext('2d').drawImage(video, 0, 0);
+  const b64 = canvas.toDataURL('image/jpeg', 0.85).split(',')[1];
+  document.getElementById('camera-status').textContent = 'Analyzing cards...';
+
+  const target = cameraTarget;
+  closeCamera();
+
+  const statusEl = target === 'hole'
+    ? document.getElementById('hole-scan-status')
+    : null;
+
+  if (statusEl) { statusEl.textContent = 'Scanning...'; statusEl.className = 'scan-status'; }
+
+  try {
+    const detected = await detectCards(b64);
+    const cards = getStageCards(target);
+    const limit = getStageLimit(target);
+    const used = new Set(getAllSelectedCards().map(cardKey));
+    let added = 0;
+    for (const c of detected) {
+      if (cards.length >= limit) break;
+      if (!RANKS.includes(c.rank) || !SUITS.includes(c.suit)) continue;
+      if (used.has(cardKey(c))) continue;
+      cards.push(c);
+      used.add(cardKey(c));
+      added++;
+    }
+    if (statusEl) {
+      statusEl.textContent = added > 0 ? `Detected ${added} card(s).` : 'No new cards detected.';
+      statusEl.className = 'scan-status ' + (added > 0 ? 'success' : 'error');
+    }
+    renderAll();
+    scheduleCalc();
+  } catch(e) {
+    if (statusEl) { statusEl.textContent = 'Detection failed: ' + e.message; statusEl.className = 'scan-status error'; }
+  }
+}
+
+async function detectCards(b64) {
+  const resp = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 256,
+      system: 'You are a playing card detector. The user will show you cards. Return ONLY a valid JSON array, no other text, no markdown, no explanation. Format: [{"rank": "A", "suit": "spades"}]. Ranks: A, 2–10, J, Q, K. Suits: spades, hearts, diamonds, clubs.',
+      messages: [{
+        role: 'user',
+        content: [{ type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: b64 } },
+                  { type: 'text', text: 'What cards are in this image?' }]
+      }]
+    })
+  });
+  if (!resp.ok) throw new Error('API error ' + resp.status);
+  const data = await resp.json();
+  const text = data.content[0].text.trim();
+  const arr = JSON.parse(text);
+  if (!Array.isArray(arr)) throw new Error('Unexpected response');
+  return arr;
+}
+
+// ═══════════════════════════════════════════════════
+//  RENDER
+// ═══════════════════════════════════════════════════
+function renderCard(c, removeFn) {
+  const div = document.createElement('div');
+  div.className = 'playing-card ' + (RED_SUITS.has(c.suit) ? 'red' : 'black');
+  div.innerHTML = `
+    <div class="corner">${c.rank}<br>${SUIT_SYM[c.suit]}</div>
+    <div class="rank">${c.rank}</div>
+    <div class="suit-sym">${SUIT_SYM[c.suit]}</div>
+    <div class="corner-bot">${c.rank}<br>${SUIT_SYM[c.suit]}</div>
+    <button class="remove-card" title="Remove" onclick="event.stopPropagation();(${removeFn.toString()})()" >✕</button>
+  `;
+  return div;
+}
+
+function renderStage(containerId, cards, maxCards, removeFn) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = '';
+  cards.forEach((c, i) => {
+    const fn = new Function(`${removeFn}(${i})`);
+    const el = renderCard(c, fn);
+    el.querySelector('.remove-card').onclick = (e) => { e.stopPropagation(); removeFn(i); };
+    container.appendChild(el);
+  });
+  for (let i = cards.length; i < maxCards; i++) {
+    const ph = document.createElement('div');
+    ph.className = 'card-placeholder';
+    ph.textContent = '?';
+    container.appendChild(ph);
+  }
+}
+
+function renderAll() {
+  // Hole cards
+  const holeContainer = document.getElementById('hole-cards-display');
+  holeContainer.innerHTML = '';
+  holeCards.forEach((c, i) => {
+    const el = document.createElement('div');
+    el.className = 'playing-card ' + (RED_SUITS.has(c.suit) ? 'red' : 'black');
+    el.innerHTML = `
+      <div class="corner">${c.rank}<br>${SUIT_SYM[c.suit]}</div>
+      <div class="rank">${c.rank}</div>
+      <div class="suit-sym">${SUIT_SYM[c.suit]}</div>
+      <div class="corner-bot">${c.rank}<br>${SUIT_SYM[c.suit]}</div>
+    `;
+    const rmBtn = document.createElement('button');
+    rmBtn.className = 'remove-card';
+    rmBtn.title = 'Remove';
+    rmBtn.textContent = '✕';
+    rmBtn.onclick = (e) => { e.stopPropagation(); holeCards.splice(i,1); renderAll(); scheduleCalc(); };
+    el.appendChild(rmBtn);
+    holeContainer.appendChild(el);
+  });
+  for (let i = holeCards.length; i < 2; i++) {
+    const ph = document.createElement('div');
+    ph.className = 'card-placeholder';
+    ph.textContent = '?';
+    holeContainer.appendChild(ph);
+  }
+
+  // Disable scan buttons if no API key
+  ['hole','flop','turn','river'].forEach(s => {
+    const btn = document.getElementById('scan-' + s + '-btn');
+    if (btn) btn.disabled = !apiKey;
+  });
+
+  // Community cards
+  ['flop','turn','river'].forEach(stage => {
+    const maxCards = stage === 'flop' ? 3 : 1;
+    const cards = community[stage];
+    const container = document.getElementById(stage + '-display');
+    container.innerHTML = '';
+    cards.forEach((c, i) => {
+      const el = document.createElement('div');
+      el.className = 'playing-card ' + (RED_SUITS.has(c.suit) ? 'red' : 'black');
+      el.innerHTML = `
+        <div class="corner">${c.rank}<br>${SUIT_SYM[c.suit]}</div>
+        <div class="rank">${c.rank}</div>
+        <div class="suit-sym">${SUIT_SYM[c.suit]}</div>
+        <div class="corner-bot">${c.rank}<br>${SUIT_SYM[c.suit]}</div>
+      `;
+      const rmBtn = document.createElement('button');
+      rmBtn.className = 'remove-card';
+      rmBtn.textContent = '✕';
+      rmBtn.onclick = ((s, idx) => (e) => { e.stopPropagation(); community[s].splice(idx,1); renderAll(); scheduleCalc(); })(stage, i);
+      el.appendChild(rmBtn);
+      container.appendChild(el);
+    });
+    for (let i = cards.length; i < maxCards; i++) {
+      const ph = document.createElement('div');
+      ph.className = 'card-placeholder';
+      ph.textContent = '?';
+      container.appendChild(ph);
+    }
+  });
+
+  document.getElementById('players-val').textContent = numPlayers;
+}
+
+// ═══════════════════════════════════════════════════
+//  GAME CONTROLS
+// ═══════════════════════════════════════════════════
+function adjustPlayers(delta) {
+  numPlayers = Math.max(2, Math.min(8, numPlayers + delta));
+  document.getElementById('players-val').textContent = numPlayers;
+  scheduleCalc();
+}
+
+function resetHole() {
+  holeCards = [];
+  document.getElementById('hole-scan-status').textContent = '';
+  renderAll();
+  scheduleCalc();
+}
+
+function resetStage(stage) {
+  community[stage] = [];
+  renderAll();
+  scheduleCalc();
+}
+
+function resetAll() {
+  holeCards = [];
+  community = { flop: [], turn: [], river: [] };
+  document.getElementById('hole-scan-status').textContent = '';
+  document.getElementById('odds-section').style.display = 'none';
+  document.getElementById('pot-odds-section').style.display = 'none';
+  renderAll();
+}
+
+// ═══════════════════════════════════════════════════
+//  ODDS ENGINE
+// ═══════════════════════════════════════════════════
+const RANK_ORDER = { 'A':14,'K':13,'Q':12,'J':11,'10':10,'9':9,'8':8,'7':7,'6':6,'5':5,'4':4,'3':3,'2':2 };
+
+function rankVal(r) { return RANK_ORDER[r]; }
+
+function buildDeck() {
+  const deck = [];
+  for (const r of RANKS) for (const s of SUITS) deck.push({rank:r,suit:s});
+  return deck;
+}
+
+function removeKnown(deck, known) {
+  const used = new Set(known.map(cardKey));
+  return deck.filter(c => !used.has(cardKey(c)));
+}
+
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i+1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+// Evaluate best 5-card hand from 7 cards. Returns [rank, tiebreakers]
+// Hand ranks: 9=Royal Flush, 8=Straight Flush, 7=Four of a Kind, 6=Full House,
+//             5=Flush, 4=Straight, 3=Three of a Kind, 2=Two Pair, 1=One Pair, 0=High Card
+function evaluate(cards) {
+  const vals = cards.map(c => rankVal(c.rank)).sort((a,b)=>b-a);
+  const suits = cards.map(c => c.suit);
+  const suitGroups = {};
+  for (let i=0;i<cards.length;i++) {
+    if (!suitGroups[suits[i]]) suitGroups[suits[i]] = [];
+    suitGroups[suits[i]].push(rankVal(cards[i].rank));
+  }
+  const valCount = {};
+  for (const v of vals) valCount[v] = (valCount[v]||0)+1;
+  const counts = Object.entries(valCount).map(([v,c])=>[+v,c]).sort((a,b)=>b[1]-a[1]||b[0]-a[0]);
+  const groups = counts.map(x=>x[1]);
+
+  // Check flush
+  let flushSuit = null;
+  for (const [s, sv] of Object.entries(suitGroups)) {
+    if (sv.length >= 5) { flushSuit = s; break; }
+  }
+
+  // Check straight (including A-low)
+  function checkStraight(vs) {
+    const uniq = [...new Set(vs)].sort((a,b)=>b-a);
+    // Normal straight
+    for (let i=0;i<=uniq.length-5;i++) {
+      if (uniq[i]-uniq[i+4]===4 && uniq[i+1]-uniq[i+2]===1 && uniq[i+2]-uniq[i+3]===1 && uniq[i+3]-uniq[i+4]===1 && uniq[i]-uniq[i+1]===1) {
+        return uniq[i];
+      }
+    }
+    // A-2-3-4-5
+    if (uniq.includes(14)&&uniq.includes(2)&&uniq.includes(3)&&uniq.includes(4)&&uniq.includes(5)) return 5;
+    return 0;
+  }
+
+  const straightHigh = checkStraight(vals);
+
+  if (flushSuit) {
+    const fv = suitGroups[flushSuit].sort((a,b)=>b-a);
+    const sfHigh = checkStraight(fv);
+    if (sfHigh) {
+      if (sfHigh === 14) return [9, [14]]; // Royal Flush
+      return [8, [sfHigh]]; // Straight Flush
+    }
+    return [5, fv.slice(0,5)]; // Flush
+  }
+
+  if (groups[0]===4) return [7, [counts[0][0], counts[1][0]]]; // Four of a Kind
+  if (groups[0]===3 && groups[1]>=2) return [6, [counts[0][0], counts[1][0]]]; // Full House
+  if (straightHigh) return [4, [straightHigh]]; // Straight
+  if (groups[0]===3) return [3, [counts[0][0], counts[1][0], counts[2][0]]]; // Three of a Kind
+  if (groups[0]===2 && groups[1]===2) return [2, [counts[0][0], counts[1][0], counts[2][0]]]; // Two Pair
+  if (groups[0]===2) return [1, [counts[0][0], ...counts.slice(1).map(x=>x[0]).slice(0,3)]]; // One Pair
+  return [0, vals.slice(0,5)]; // High Card
+}
+
+function compareHands(a, b) {
+  if (a[0] !== b[0]) return a[0] - b[0];
+  for (let i=0;i<Math.max(a[1].length,b[1].length);i++) {
+    const av = a[1][i]||0, bv = b[1][i]||0;
+    if (av !== bv) return av - bv;
+  }
+  return 0;
+}
+
+function monteCarlo(hole, board, numPlayers, iterations=10000) {
+  const allKnown = [...hole, ...board];
+  const baseDeck = buildDeck();
+  let wins=0, ties=0, losses=0;
+
+  for (let iter=0; iter<iterations; iter++) {
+    const deck = shuffle(removeKnown(baseDeck, allKnown));
+    let idx = 0;
+
+    // Complete the board
+    const fullBoard = [...board];
+    while (fullBoard.length < 5) fullBoard.push(deck[idx++]);
+
+    // Deal opponents
+    const opponents = [];
+    for (let p=1; p<numPlayers; p++) {
+      opponents.push([deck[idx++], deck[idx++]]);
+    }
+
+    // Evaluate
+    const myHand = evaluate([...hole, ...fullBoard]);
+    let best = myHand;
+    let isTie = false;
+    let isWin = true;
+    for (const opp of opponents) {
+      const oppHand = evaluate([...opp, ...fullBoard]);
+      const cmp = compareHands(oppHand, myHand);
+      if (cmp > 0) { isWin = false; isTie = false; break; }
+      if (cmp === 0) isTie = true;
+    }
+    if (isWin && isTie) ties++;
+    else if (isWin) wins++;
+    else losses++;
+  }
+
+  return { win: wins/iterations*100, tie: ties/iterations*100, loss: losses/iterations*100 };
+}
+
+const HAND_NAMES = ['High Card','One Pair','Two Pair','Three of a Kind','Straight','Flush','Full House','Four of a Kind','Straight Flush','Royal Flush'];
+
+function getHandLabel(hole, board) {
+  if (hole.length < 2) return '—';
+  const all = [...hole, ...board];
+  if (all.length < 2) return '—';
+  if (all.length >= 5) {
+    const [rank] = evaluate(all);
+    return HAND_NAMES[rank];
+  }
+  // Draw detection for fewer than 5 cards
+  const vals = hole.map(c=>rankVal(c.rank));
+  const suits = hole.map(c=>c.suit);
+  const boardVals = board.map(c=>rankVal(c.rank));
+  const boardSuits = board.map(c=>c.suit);
+
+  // Flush draw
+  const suitCount = {};
+  for (const s of [...suits, ...boardSuits]) suitCount[s]=(suitCount[s]||0)+1;
+  const maxSuit = Math.max(...Object.values(suitCount));
+  if (maxSuit === 4) return 'Flush Draw';
+
+  // Pair check
+  const allVals = [...vals, ...boardVals];
+  const vc = {};
+  for (const v of allVals) vc[v]=(vc[v]||0)+1;
+  const maxCount = Math.max(...Object.values(vc));
+  if (maxCount >= 3) return 'Three of a Kind';
+  if (maxCount === 2) {
+    const pairs = Object.values(vc).filter(x=>x===2).length;
+    if (pairs >= 2) return 'Two Pair';
+    return 'One Pair';
+  }
+
+  // Straight draw
+  const uniqVals = [...new Set(allVals)].sort((a,b)=>a-b);
+  let maxConsec = 1, cur = 1;
+  for (let i=1;i<uniqVals.length;i++) {
+    if (uniqVals[i]-uniqVals[i-1]===1) { cur++; maxConsec=Math.max(maxConsec,cur); }
+    else cur=1;
+  }
+  if (maxConsec === 4) return 'Open-Ended Straight Draw';
+  if (maxConsec === 3) {
+    // Check for gutshot
+    for (let i=0;i<uniqVals.length-2;i++) {
+      if (uniqVals[i+2]-uniqVals[i]===3) return 'Gutshot Straight Draw';
+    }
+  }
+
+  // Hole card pair
+  if (vals[0]===vals[1]) return 'Pocket Pair';
+
+  // Top pair check (if board exists)
+  if (boardVals.length > 0) {
+    const maxBoard = Math.max(...boardVals);
+    if (vals.includes(maxBoard)) return 'Top Pair';
+    if (boardVals.some(bv=>vals.includes(bv))) return 'Pair';
+  }
+
+  return 'High Card';
+}
+
+function countOuts(hole, board) {
+  if (hole.length < 2) return 0;
+  const known = [...hole, ...board];
+  const deck = removeKnown(buildDeck(), known);
+  const currentBest = board.length >= 3 ? evaluate([...hole,...board])[0] : -1;
+  let outs = 0;
+  for (const c of deck) {
+    const test = [...hole, ...board, c];
+    if (test.length >= 5) {
+      const [r] = evaluate(test);
+      if (r > currentBest) { outs++; }
+    }
+  }
+  return outs;
+}
+
+function scheduleCalc() {
+  if (holeCards.length < 2) {
+    document.getElementById('odds-section').style.display = 'none';
+    document.getElementById('pot-odds-section').style.display = 'none';
+    return;
+  }
+  document.getElementById('odds-section').style.display = 'block';
+  document.getElementById('pot-odds-section').style.display = 'block';
+  document.getElementById('calculating-msg').classList.remove('hidden');
+
+  clearTimeout(calcTimeout);
+  calcTimeout = setTimeout(() => {
+    const board = [...community.flop, ...community.turn, ...community.river];
+    const result = monteCarlo(holeCards, board, numPlayers);
+    const label = getHandLabel(holeCards, board);
+    const outs = countOuts(holeCards, board);
+    displayOdds(result, label, outs);
+  }, 50);
+}
+
+function displayOdds(result, label, outs) {
+  document.getElementById('calculating-msg').classList.add('hidden');
+
+  const winEl = document.getElementById('win-pct');
+  winEl.textContent = result.win.toFixed(1) + '%';
+  winEl.className = 'win-pct' + (result.win < 30 ? ' danger' : result.win < 50 ? ' caution' : '');
+
+  document.getElementById('bar-win').style.width = result.win + '%';
+  document.getElementById('bar-tie').style.width = result.tie + '%';
+  document.getElementById('bar-loss').style.width = result.loss + '%';
+
+  document.getElementById('legend-win').textContent = 'Win ' + result.win.toFixed(1) + '%';
+  document.getElementById('legend-tie').textContent = 'Tie ' + result.tie.toFixed(1) + '%';
+  document.getElementById('legend-loss').textContent = 'Loss ' + result.loss.toFixed(1) + '%';
+
+  document.getElementById('hand-label').textContent = label;
+  document.getElementById('outs-info').textContent = outs > 0 ? `${outs} out${outs!==1?'s':''} to improve` : '';
+
+  const content = document.getElementById('odds-content');
+  content.classList.remove('stats-animate');
+  void content.offsetWidth;
+  content.classList.add('stats-animate');
+
+  calcPotOdds();
+}
+
+function calcPotOdds() {
+  const pot = parseFloat(document.getElementById('pot-size').value);
+  const call = parseFloat(document.getElementById('call-amount').value);
+  const resultEl = document.getElementById('pot-result');
+  if (!pot || !call || call <= 0) {
+    resultEl.textContent = 'Enter amounts above';
+    resultEl.className = 'pot-result neutral';
+    return;
+  }
+  const potOddsPct = call / (pot + call) * 100;
+  const winPct = parseFloat(document.getElementById('win-pct').textContent) || 0;
+  if (winPct === 0) { resultEl.textContent = 'Calculate odds first'; resultEl.className = 'pot-result neutral'; return; }
+  if (winPct > potOddsPct) {
+    resultEl.textContent = `✓ Profitable (need ${potOddsPct.toFixed(1)}%, have ${winPct.toFixed(1)}%)`;
+    resultEl.className = 'pot-result profitable';
+  } else {
+    resultEl.textContent = `✗ Unprofitable (need ${potOddsPct.toFixed(1)}%, have ${winPct.toFixed(1)}%)`;
+    resultEl.className = 'pot-result unprofitable';
+  }
+}
+</script>
+</body>
+</html>
