@@ -906,6 +906,208 @@
   .theme-toggle:hover { opacity: 1; border-color: rgba(212,168,32,0.6); }
   .theme-toggle .toggle-icon { font-size: 0.85rem; }
 
+  /* ── LIVE DECISION DASHBOARD ── */
+  .dash-reopen-btn {
+    display: none;
+    align-items: center; gap: 0.4rem;
+    margin: 0 auto 0.8rem;
+    background: none; border: 1px solid rgba(212,168,32,0.25);
+    border-radius: 20px; padding: 0.28rem 0.9rem;
+    font-family: 'IBM Plex Mono', monospace; font-size: 0.6rem;
+    letter-spacing: 0.14em; color: var(--gold); opacity: 0.55;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .dash-reopen-btn:hover { opacity: 1; border-color: rgba(212,168,32,0.55); }
+  .dash-reopen-btn.visible { display: flex; }
+
+  .live-dashboard {
+    border-radius: 18px;
+    padding: 1.1rem 1.3rem 1.2rem;
+    margin-bottom: 1rem;
+    border: 1px solid rgba(212,168,32,0.18);
+    border-top-color: rgba(212,168,32,0.32);
+    background: rgba(4,14,8,0.8);
+    transition: opacity 0.2s;
+  }
+  .live-dashboard.dash-hidden { display: none; }
+
+  .dash-toprow {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 0.9rem;
+  }
+  .dash-eyebrow {
+    font-size: 0.58rem; letter-spacing: 0.26em;
+    color: var(--gold); opacity: 0.55;
+    text-transform: uppercase;
+  }
+  .dash-close-btn {
+    background: none; border: none; color: var(--muted);
+    font-size: 0.75rem; cursor: pointer; opacity: 0.5;
+    padding: 0.1rem 0.3rem; line-height: 1;
+    transition: opacity 0.15s;
+  }
+  .dash-close-btn:hover { opacity: 1; color: var(--cream); }
+
+  .dash-body {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr 1fr;
+    gap: 1rem;
+    align-items: start;
+  }
+
+  /* Left col — hand state */
+  .dash-hand-state { display: flex; flex-direction: column; gap: 0.45rem; }
+  .dash-mini-label {
+    font-size: 0.55rem; letter-spacing: 0.2em;
+    color: var(--gold); opacity: 0.5; text-transform: uppercase;
+  }
+  .dash-mini-cards { display: flex; gap: 0.3rem; flex-wrap: wrap; }
+  .dash-mini-card {
+    width: 34px; height: 48px;
+    border-radius: 5px;
+    border: 1px solid rgba(255,255,255,0.15);
+    background: #fff;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 0; line-height: 1;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+  }
+  .dash-mini-card.small { width: 25px; height: 36px; }
+  .dash-mini-card.empty {
+    background: rgba(255,255,255,0.04);
+    border-style: dashed; border-color: rgba(255,255,255,0.12);
+    color: rgba(255,255,255,0.18); font-size: 0.8rem;
+  }
+  .dash-mini-card.empty.small { font-size: 0.6rem; }
+  .dmc-rank {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.72rem; font-weight: 700; line-height: 1.1;
+  }
+  .dmc-suit { font-size: 0.6rem; line-height: 1; }
+  .dash-mini-card.small .dmc-rank { font-size: 0.55rem; }
+  .dash-mini-card.small .dmc-suit { font-size: 0.48rem; }
+  .dash-mini-card.red .dmc-rank,
+  .dash-mini-card.red .dmc-suit { color: #cc1122; }
+  .dash-mini-card.black .dmc-rank,
+  .dash-mini-card.black .dmc-suit { color: #111; }
+
+  .dash-pills {
+    display: flex; gap: 0.3rem; flex-wrap: wrap; margin-top: 0.1rem;
+  }
+  .dash-pill {
+    font-size: 0.56rem; letter-spacing: 0.1em;
+    padding: 0.2rem 0.5rem; border-radius: 20px;
+    border: 1px solid rgba(212,168,32,0.22);
+    color: var(--gold); opacity: 0.75;
+    background: rgba(212,168,32,0.06);
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .dash-pill.active { opacity: 1; border-color: rgba(212,168,32,0.5); background: rgba(212,168,32,0.12); }
+
+  /* Center col — metrics */
+  .dash-metrics { display: flex; flex-direction: column; gap: 0.55rem; }
+  .dash-metric-pair {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;
+  }
+  .dash-metric {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 10px;
+    padding: 0.55rem 0.7rem;
+    display: flex; flex-direction: column; gap: 0.15rem;
+  }
+  .dash-metric-label {
+    font-size: 0.52rem; letter-spacing: 0.18em;
+    color: var(--muted); text-transform: uppercase;
+  }
+  .dash-metric-val {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 1.2rem; font-weight: 700; line-height: 1;
+    color: var(--cream);
+  }
+  .dash-metric-val.win-color  { color: var(--win); }
+  .dash-metric-val.loss-color { color: var(--loss); }
+  .dash-metric-val.edge-pos   { color: var(--win); }
+  .dash-metric-val.edge-neg   { color: var(--loss); }
+  .dash-metric-val.muted-val  { color: var(--muted); }
+  .dash-hand-name {
+    font-size: 0.7rem; color: var(--gold-light); opacity: 0.8;
+    text-align: center; letter-spacing: 0.06em;
+    font-family: 'Playfair Display', serif;
+    padding: 0.3rem 0; border-top: 1px solid rgba(255,255,255,0.06);
+  }
+
+  /* Right col — verdict */
+  .dash-verdict-col {
+    display: flex; flex-direction: column; align-items: center;
+    gap: 0.7rem; text-align: center; padding-top: 0.2rem;
+  }
+  .dash-verdict-badge {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.9rem; font-weight: 700; letter-spacing: 0.16em;
+    padding: 0.6rem 1.2rem; border-radius: 30px;
+    text-transform: uppercase; min-width: 110px;
+    transition: all 0.3s ease;
+  }
+  .dash-verdict-badge.v-neutral {
+    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+    color: var(--muted);
+  }
+  .dash-verdict-badge.v-call {
+    background: rgba(31,219,110,0.15); border: 1px solid rgba(31,219,110,0.4);
+    color: #1fdb6e; box-shadow: 0 0 18px rgba(31,219,110,0.15);
+  }
+  .dash-verdict-badge.v-raise {
+    background: rgba(212,168,32,0.18); border: 1px solid rgba(212,168,32,0.5);
+    color: var(--gold-light); box-shadow: 0 0 18px rgba(212,168,32,0.18);
+  }
+  .dash-verdict-badge.v-fold {
+    background: rgba(232,51,74,0.15); border: 1px solid rgba(232,51,74,0.4);
+    color: #e8334a; box-shadow: 0 0 18px rgba(232,51,74,0.15);
+  }
+  .dash-verdict-badge.v-marginal {
+    background: rgba(232,160,32,0.15); border: 1px solid rgba(232,160,32,0.4);
+    color: #f0b830;
+  }
+  .dash-verdict-badge.v-favorable {
+    background: rgba(31,219,110,0.08); border: 1px solid rgba(31,219,110,0.25);
+    color: #80e8a8;
+  }
+  .dash-verdict-reason {
+    font-size: 0.67rem; color: var(--muted); line-height: 1.5;
+    max-width: 160px;
+  }
+
+  /* Divider between cols */
+  .dash-divider {
+    width: 1px; background: rgba(255,255,255,0.07);
+    align-self: stretch; margin: 0;
+  }
+
+  /* Mobile stacking */
+  @media (max-width: 600px) {
+    .dash-body {
+      grid-template-columns: 1fr;
+      gap: 0.9rem;
+    }
+    .dash-divider { width: 100%; height: 1px; }
+    .dash-verdict-col { flex-direction: row; align-items: center; text-align: left; gap: 0.8rem; }
+    .dash-verdict-reason { max-width: none; }
+    .dash-metric-val { font-size: 1rem; }
+  }
+
+  /* Light mode dashboard overrides */
+  body.light .live-dashboard { background: rgba(255,252,244,0.88); border-color: rgba(154,98,0,0.2); border-top-color: rgba(154,98,0,0.35); }
+  body.light .dash-metric { background: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.08); }
+  body.light .dash-divider { background: rgba(0,0,0,0.08); }
+  body.light .dash-mini-card.empty { background: rgba(0,0,0,0.05); border-color: rgba(0,0,0,0.15); color: rgba(0,0,0,0.2); }
+  body.light .dash-verdict-badge.v-neutral { background: rgba(0,0,0,0.05); border-color: rgba(0,0,0,0.12); }
+  body.light .dash-metric-val.win-color  { color: var(--win); }
+  body.light .dash-metric-val.loss-color { color: var(--loss); }
+  body.light .dash-hand-name { color: var(--gold); border-color: rgba(0,0,0,0.08); }
+  body.light .dash-verdict-reason { color: var(--muted); }
+
   /* ── CHIP RAIN CANVAS ── */
   #chip-canvas {
     position: fixed; top: 0; left: 0;
@@ -953,6 +1155,70 @@
       <button class="stepper-btn" onclick="adjustPlayers(1)">＋</button>
     </div>
   </header>
+
+  <!-- Dashboard reopen button (shown when dashboard is closed) -->
+  <div style="text-align:center">
+    <button class="dash-reopen-btn" id="dash-reopen-btn" onclick="toggleDashboard()">⊞ COCKPIT</button>
+  </div>
+
+  <!-- Live Decision Dashboard -->
+  <div id="live-dashboard" class="live-dashboard glass">
+    <div class="dash-toprow">
+      <div class="dash-eyebrow">Live Decision Dashboard</div>
+      <button class="dash-close-btn" onclick="toggleDashboard()" title="Hide">✕</button>
+    </div>
+    <div class="dash-body">
+
+      <!-- Left: Hand State -->
+      <div class="dash-hand-state">
+        <div class="dash-mini-label">Pocket Cards</div>
+        <div class="dash-mini-cards" id="dash-hole-cards"></div>
+        <div class="dash-mini-label" style="margin-top:0.5rem">Board</div>
+        <div class="dash-mini-cards" id="dash-board-cards"></div>
+        <div class="dash-pills" id="dash-pills">
+          <span class="dash-pill" id="dash-pill-street">PREFLOP</span>
+          <span class="dash-pill" id="dash-pill-pos">— POS</span>
+          <span class="dash-pill" id="dash-pill-players">4P</span>
+        </div>
+      </div>
+
+      <div class="dash-divider"></div>
+
+      <!-- Center: Metrics -->
+      <div class="dash-metrics">
+        <div class="dash-metric-pair">
+          <div class="dash-metric">
+            <span class="dash-metric-label">Win</span>
+            <span class="dash-metric-val win-color" id="dash-win">—</span>
+          </div>
+          <div class="dash-metric">
+            <span class="dash-metric-label">Loss</span>
+            <span class="dash-metric-val loss-color" id="dash-loss">—</span>
+          </div>
+        </div>
+        <div class="dash-metric-pair">
+          <div class="dash-metric">
+            <span class="dash-metric-label">Pot Odds</span>
+            <span class="dash-metric-val muted-val" id="dash-pot-odds-val">—</span>
+          </div>
+          <div class="dash-metric">
+            <span class="dash-metric-label">Edge</span>
+            <span class="dash-metric-val muted-val" id="dash-edge-val">—</span>
+          </div>
+        </div>
+        <div class="dash-hand-name" id="dash-hand-name">—</div>
+      </div>
+
+      <div class="dash-divider"></div>
+
+      <!-- Right: Verdict -->
+      <div class="dash-verdict-col">
+        <div class="dash-verdict-badge v-neutral" id="dash-verdict-badge">—</div>
+        <div class="dash-verdict-reason" id="dash-verdict-reason">Enter your pocket cards to begin</div>
+      </div>
+
+    </div>
+  </div>
 
   <!-- Hole Cards -->
   <div class="section glass">
@@ -1278,6 +1544,147 @@
 })();
 
 // ═══════════════════════════════════════════════════
+//  LIVE DECISION DASHBOARD
+// ═══════════════════════════════════════════════════
+function toggleDashboard() {
+  const dash = document.getElementById('live-dashboard');
+  const reopen = document.getElementById('dash-reopen-btn');
+  const hidden = dash.classList.toggle('dash-hidden');
+  if (hidden) reopen.classList.add('visible');
+  else reopen.classList.remove('visible');
+}
+
+function renderDashCards() {
+  const holeWrap  = document.getElementById('dash-hole-cards');
+  const boardWrap = document.getElementById('dash-board-cards');
+  if (!holeWrap) return;
+
+  holeWrap.innerHTML = '';
+  for (let i = 0; i < 2; i++) {
+    const c = holeCards[i];
+    if (c) {
+      const isRed = RED_SUITS.has(c.suit);
+      holeWrap.innerHTML += `<div class="dash-mini-card ${isRed?'red':'black'}">
+        <span class="dmc-rank">${c.rank}</span><span class="dmc-suit">${SUIT_SYM[c.suit]}</span>
+      </div>`;
+    } else {
+      holeWrap.innerHTML += `<div class="dash-mini-card empty">?</div>`;
+    }
+  }
+
+  const boardCards = [...community.flop, ...community.turn, ...community.river];
+  boardWrap.innerHTML = '';
+  for (let i = 0; i < 5; i++) {
+    const c = boardCards[i];
+    if (c) {
+      const isRed = RED_SUITS.has(c.suit);
+      boardWrap.innerHTML += `<div class="dash-mini-card small ${isRed?'red':'black'}">
+        <span class="dmc-rank">${c.rank}</span><span class="dmc-suit">${SUIT_SYM[c.suit]}</span>
+      </div>`;
+    } else {
+      boardWrap.innerHTML += `<div class="dash-mini-card empty small">·</div>`;
+    }
+  }
+}
+
+function updateDashboard() {
+  renderDashCards();
+
+  // Pills
+  const street = currentStreetLabel();
+  const streetPill = document.getElementById('dash-pill-street');
+  const posPill    = document.getElementById('dash-pill-pos');
+  const playPill   = document.getElementById('dash-pill-players');
+  if (streetPill) {
+    streetPill.textContent = street;
+    streetPill.className = 'dash-pill active';
+  }
+  if (posPill) {
+    posPill.textContent = selectedPosition || '— POS';
+    posPill.className = 'dash-pill' + (selectedPosition ? ' active' : '');
+  }
+  if (playPill) {
+    playPill.textContent = numPlayers + 'P';
+  }
+
+  // Win / Loss
+  const winEl  = document.getElementById('win-pct');
+  const lossEl = document.getElementById('loss-pct');
+  const winPct  = winEl  ? parseFloat(winEl.textContent)  : NaN;
+  const lossPct = lossEl ? parseFloat(lossEl.textContent) : NaN;
+  const dashWin  = document.getElementById('dash-win');
+  const dashLoss = document.getElementById('dash-loss');
+  if (dashWin)  dashWin.textContent  = isNaN(winPct)  ? '—' : winPct.toFixed(1)  + '%';
+  if (dashLoss) dashLoss.textContent = isNaN(lossPct) ? '—' : lossPct.toFixed(1) + '%';
+
+  // Pot odds & edge
+  const pot  = parseFloat(document.getElementById('pot-size')?.value)  || 0;
+  const call = parseFloat(document.getElementById('call-amount')?.value) || 0;
+  let potOddsPct = NaN;
+  if (pot > 0 && call > 0) potOddsPct = call / (pot + call) * 100;
+
+  const poEl = document.getElementById('dash-pot-odds-val');
+  const edgeEl = document.getElementById('dash-edge-val');
+  if (poEl) {
+    poEl.textContent = isNaN(potOddsPct) ? '—' : potOddsPct.toFixed(1) + '%';
+    poEl.className = 'dash-metric-val' + (isNaN(potOddsPct) ? ' muted-val' : '');
+  }
+  if (edgeEl) {
+    if (!isNaN(winPct) && !isNaN(potOddsPct)) {
+      const edge = winPct - potOddsPct;
+      edgeEl.textContent = (edge >= 0 ? '+' : '') + edge.toFixed(1) + '%';
+      edgeEl.className = 'dash-metric-val ' + (edge > 1.5 ? 'edge-pos' : edge < -1.5 ? 'edge-neg' : 'muted-val');
+    } else {
+      edgeEl.textContent = '—';
+      edgeEl.className = 'dash-metric-val muted-val';
+    }
+  }
+
+  // Hand name
+  const hnEl = document.getElementById('dash-hand-name');
+  const srcHn = document.getElementById('hand-label');
+  if (hnEl && srcHn) hnEl.textContent = srcHn.textContent || '—';
+
+  // Verdict
+  const edge = (!isNaN(winPct) && !isNaN(potOddsPct)) ? (winPct - potOddsPct) : NaN;
+  setVerdict(winPct, potOddsPct, edge);
+}
+
+function setVerdict(winPct, potOddsPct, edge) {
+  const badge  = document.getElementById('dash-verdict-badge');
+  const reason = document.getElementById('dash-verdict-reason');
+  if (!badge || !reason) return;
+
+  function set(text, cls, msg) {
+    badge.textContent = text;
+    badge.className = 'dash-verdict-badge ' + cls;
+    reason.textContent = msg;
+  }
+
+  if (holeCards.length < 2) {
+    return set('—', 'v-neutral', 'Enter your pocket cards to begin');
+  }
+  if (isNaN(winPct)) {
+    return set('...', 'v-neutral', 'Running simulation');
+  }
+
+  // No pot/call entered yet — equity-only verdicts
+  if (isNaN(potOddsPct)) {
+    if (winPct >= 72)      return set('RAISE', 'v-raise',     'Dominant equity — raise to build the pot');
+    if (winPct >= 52)      return set('FAVORABLE', 'v-favorable', 'Above 50% equity — add pot & call for full read');
+    if (winPct >= 36)      return set('MARGINAL', 'v-marginal', 'Moderate equity — enter pot & call to complete analysis');
+    return                        set('CAUTION', 'v-fold',    'Low equity — enter pot & call to evaluate');
+  }
+
+  // Full pot-odds verdict
+  if (edge > 12)           return set('RAISE', 'v-raise',     `Equity crushes pot odds by ${edge.toFixed(1)}% — extract value`);
+  if (edge > 4)            return set('CALL',  'v-call',      `+EV: equity beats pot odds by ${edge.toFixed(1)}%`);
+  if (edge >= -4)          return set('MARGINAL', 'v-marginal', `Near break-even — weigh position & reads`);
+  if (edge >= -12)         return set('FOLD',  'v-fold',      `Equity trails pot odds by ${Math.abs(edge).toFixed(1)}% — likely -EV`);
+                           return set('FOLD',  'v-fold',      `Clear fold — equity misses pot odds by ${Math.abs(edge).toFixed(1)}%`);
+}
+
+// ═══════════════════════════════════════════════════
 //  THEME TOGGLE
 // ═══════════════════════════════════════════════════
 function toggleTheme() {
@@ -1311,6 +1718,7 @@ const RED_SUITS = new Set(['hearts','diamonds']);
 window.addEventListener('load', () => {
   buildRankButtons();
   renderAll();
+  updateDashboard();
 });
 
 // ═══════════════════════════════════════════════════
@@ -1517,6 +1925,7 @@ function adjustPlayers(delta) {
   const _v2 = document.getElementById('players-val2'); if (_v2) _v2.textContent = numPlayers;
   const v2 = document.getElementById('players-val2');
   if (v2) v2.textContent = numPlayers;
+  updateDashboard();
   scheduleCalc();
 }
 
@@ -1551,6 +1960,7 @@ function resetAll() {
   document.getElementById('delta-loss').className = 'odds-delta';
   document.getElementById('odds-bar').classList.add('hidden');
   renderAll();
+  updateDashboard();
 }
 
 // ═══════════════════════════════════════════════════
@@ -1860,6 +2270,7 @@ function displayOdds(result, label, outs, streetLabel) {
   // Refresh collapsible panels if open
   if (document.getElementById('rankings-body').classList.contains('open')) buildRankingsTable();
   if (document.getElementById('preflop-body').classList.contains('open'))  updatePreflop();
+  updateDashboard();
 }
 
 function drawSparkline() {
@@ -1934,6 +2345,7 @@ function calcPotOdds() {
     resultEl.textContent = `✗ Unprofitable (need ${potOddsPct.toFixed(1)}%, have ${winPct.toFixed(1)}%)`;
     resultEl.className = 'pot-result unprofitable';
   }
+  updateDashboard();
 }
 
 // ═══════════════════════════════════════════════════
@@ -2075,6 +2487,7 @@ function selectPosition(btn) {
   btn.classList.add('selected');
   selectedPosition = btn.dataset.pos;
   updatePosAction();
+  updateDashboard();
 }
 
 function updatePreflop() {
