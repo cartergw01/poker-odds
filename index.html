@@ -249,12 +249,20 @@
 
   .card-placeholder {
     width: 62px; height: 92px;
-    border: 1.5px dashed rgba(212,168,32,0.2);
+    border: 1.5px dashed rgba(212,168,32,0.35);
     border-radius: 10px;
     display: flex; align-items: center; justify-content: center;
-    color: rgba(212,168,32,0.2);
+    color: rgba(212,168,32,0.35);
     font-size: 1.3rem;
-    background: rgba(255,255,255,0.02);
+    background: rgba(212,168,32,0.04);
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s, transform 0.15s;
+  }
+  .card-placeholder:hover, .card-placeholder:active {
+    border-color: rgba(212,168,32,0.7);
+    color: rgba(212,168,32,0.7);
+    background: rgba(212,168,32,0.1);
+    transform: translateY(-2px);
   }
 
   /* ── MODALS ── */
@@ -812,15 +820,10 @@ function renderAll() {
   for (let i = holeCards.length; i < 2; i++) {
     const ph = document.createElement('div');
     ph.className = 'card-placeholder';
-    ph.textContent = '?';
+    ph.textContent = '+';
+    ph.onclick = () => openPicker('hole');
     holeContainer.appendChild(ph);
   }
-
-  // Disable scan buttons if no API key
-  ['hole','flop','turn','river'].forEach(s => {
-    const btn = document.getElementById('scan-' + s + '-btn');
-    if (btn) btn.disabled = !apiKey;
-  });
 
   // Community cards
   ['flop','turn','river'].forEach(stage => {
@@ -847,7 +850,8 @@ function renderAll() {
     for (let i = cards.length; i < maxCards; i++) {
       const ph = document.createElement('div');
       ph.className = 'card-placeholder';
-      ph.textContent = '?';
+      ph.textContent = '+';
+      ph.onclick = () => openPicker(stage);
       container.appendChild(ph);
     }
   });
