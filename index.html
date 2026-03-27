@@ -354,10 +354,21 @@
   .picker-actions { display: flex; gap: 0.6rem; justify-content: flex-end; margin-top: 0.4rem; }
 
 
-  /* ── PLAYERS ── */
-  .players-row { display: flex; align-items: center; gap: 1.2rem; flex-wrap: wrap; }
-  .players-row label { color: var(--muted); font-size: 0.76rem; letter-spacing: 0.04em; }
-  .player-stepper { display: flex; align-items: center; gap: 0.8rem; }
+  /* ── PLAYERS (compact header) ── */
+  .players-compact {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    margin-top: 0.9rem;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 10px;
+    padding: 0.3rem 0.7rem;
+  }
+  .players-compact-label {
+    font-size: 0.62rem; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--muted);
+  }
+  .players-compact .stepper-val { font-size: 1rem; min-width: 18px; }
+  .players-compact .stepper-btn { width: 26px; height: 26px; font-size: 1rem; }
   .stepper-btn {
     width: 36px; height: 36px;
     background: rgba(255,255,255,0.05);
@@ -487,6 +498,138 @@
   .calculating { color: var(--gold); font-size: 0.72rem; animation: pulse 1.2s infinite; }
   @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.35; } }
 
+  /* ── COLLAPSIBLE ── */
+  .collapsible-header {
+    cursor: pointer;
+    user-select: none;
+    margin-bottom: 0;
+    justify-content: space-between;
+  }
+  .collapsible-header::after { display: none; } /* remove default divider line */
+  .collapse-arrow {
+    font-size: 0.85rem;
+    color: var(--gold);
+    opacity: 0.6;
+    transition: transform 0.3s ease;
+    margin-left: auto;
+  }
+  .collapsible-body {
+    overflow: hidden;
+    max-height: 0;
+    transition: max-height 0.35s ease, opacity 0.3s ease, margin-top 0.3s ease;
+    opacity: 0;
+    margin-top: 0;
+  }
+  .collapsible-body.open {
+    max-height: 1200px;
+    opacity: 1;
+    margin-top: 1.1rem;
+  }
+  .collapse-arrow.open { transform: rotate(180deg); }
+
+  /* ── HAND RANKINGS TABLE ── */
+  .rankings-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.78rem;
+  }
+  .rankings-table tr {
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    transition: background 0.15s;
+  }
+  .rankings-table tr:last-child { border-bottom: none; }
+  .rankings-table tr.active-hand {
+    background: rgba(212,168,32,0.1);
+    border-radius: 6px;
+  }
+  .rankings-table td {
+    padding: 0.5rem 0.3rem;
+    vertical-align: middle;
+  }
+  .rank-num {
+    color: var(--muted);
+    font-size: 0.6rem;
+    width: 18px;
+    text-align: right;
+    padding-right: 0.5rem;
+  }
+  .rank-name {
+    color: var(--cream);
+    font-family: 'Playfair Display', serif;
+    font-size: 0.85rem;
+    white-space: nowrap;
+  }
+  .rank-name.active-name {
+    background: linear-gradient(135deg, #f5d97a, #d4a820);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .rank-example {
+    text-align: right;
+    font-family: 'Playfair Display', serif;
+    font-size: 0.88rem;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+  }
+  .rank-example .r { color: var(--red); }
+  .rank-example .b { color: #e8e0cc; }
+
+  /* ── PREFLOP ── */
+  .preflop-label {
+    font-size: 0.62rem; letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--gold); opacity: 0.55;
+    margin-bottom: 0.5rem;
+  }
+  .tier-badge {
+    display: inline-block;
+    padding: 0.4rem 0.9rem;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    margin-bottom: 0.4rem;
+  }
+  .tier-desc { font-size: 0.75rem; color: var(--muted); margin-top: 0.2rem; }
+  .tier-empty, .pos-action-empty {
+    font-size: 0.78rem; color: var(--muted); font-style: italic;
+  }
+  .tier-premium   { background: rgba(212,168,32,0.2);  color: #f5d97a; border: 1px solid rgba(212,168,32,0.4); }
+  .tier-strong    { background: rgba(31,219,110,0.15); color: #1fdb6e; border: 1px solid rgba(31,219,110,0.35); }
+  .tier-playable  { background: rgba(232,160,32,0.15); color: #f0b830; border: 1px solid rgba(232,160,32,0.35); }
+  .tier-marginal  { background: rgba(232,120,30,0.15); color: #f08030; border: 1px solid rgba(232,120,30,0.35); }
+  .tier-fold      { background: rgba(232,51,74,0.15);  color: #ff7085; border: 1px solid rgba(232,51,74,0.35); }
+
+  .position-row {
+    display: flex; gap: 0.4rem; flex-wrap: wrap; margin-bottom: 1rem;
+  }
+  .pos-btn {
+    padding: 0.45rem 0.7rem;
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.04);
+    color: var(--muted);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .pos-btn:hover { border-color: rgba(212,168,32,0.4); color: var(--gold-light); }
+  .pos-btn.selected {
+    background: rgba(212,168,32,0.15);
+    border-color: rgba(212,168,32,0.6);
+    color: var(--gold-light);
+  }
+  .pos-action {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    padding: 0.5rem 1rem; border-radius: 8px;
+    font-size: 0.8rem; font-weight: 700; letter-spacing: 0.04em;
+    margin-top: 0.2rem;
+  }
+  .pos-raise { background: rgba(31,219,110,0.15); color: #1fdb6e; border: 1px solid rgba(31,219,110,0.35); }
+  .pos-call  { background: rgba(232,160,32,0.15); color: #f0b830; border: 1px solid rgba(232,160,32,0.35); }
+  .pos-fold  { background: rgba(232,51,74,0.15);  color: #ff7085; border: 1px solid rgba(232,51,74,0.35); }
+
   @media (max-width: 480px) {
     header h1 { font-size: 2rem; }
     .win-pct  { font-size: 4.5rem; }
@@ -521,6 +664,12 @@
     <div class="header-eyebrow">Texas Hold'em</div>
     <h1>Poker Odds</h1>
     <div class="sub">made by Carter</div>
+    <div class="players-compact">
+      <span class="players-compact-label">Players</span>
+      <button class="stepper-btn" onclick="adjustPlayers(-1)">−</button>
+      <span class="stepper-val" id="players-val">4</span>
+      <button class="stepper-btn" onclick="adjustPlayers(1)">＋</button>
+    </div>
   </header>
 
   <!-- Hole Cards -->
@@ -536,18 +685,6 @@
     </div>
   </div>
 
-  <!-- Players -->
-  <div class="section glass">
-    <div class="section-title">Players at Table</div>
-    <div class="players-row">
-      <label>Number of players (including you):</label>
-      <div class="player-stepper">
-        <button class="stepper-btn" onclick="adjustPlayers(-1)">−</button>
-        <span class="stepper-val" id="players-val">4</span>
-        <button class="stepper-btn" onclick="adjustPlayers(1)">＋</button>
-      </div>
-    </div>
-  </div>
 
   <!-- Community Cards -->
   <div class="section glass">
@@ -627,6 +764,42 @@
         <input type="number" id="call-amount" placeholder="20" min="0" oninput="calcPotOdds()">
       </div>
       <div class="pot-result neutral" id="pot-result">Enter amounts above</div>
+    </div>
+  </div>
+
+  <!-- Hand Rankings -->
+  <div class="section glass collapsible-section" id="rankings-section">
+    <div class="section-title collapsible-header" onclick="toggleSection('rankings')">
+      HAND RANKINGS
+      <span class="collapse-arrow" id="rankings-arrow">▾</span>
+    </div>
+    <div class="collapsible-body" id="rankings-body">
+      <table class="rankings-table" id="rankings-table"></table>
+    </div>
+  </div>
+
+  <!-- Preflop GTO -->
+  <div class="section glass collapsible-section" id="preflop-section">
+    <div class="section-title collapsible-header" onclick="toggleSection('preflop')">
+      PREFLOP GUIDE
+      <span class="collapse-arrow" id="preflop-arrow">▾</span>
+    </div>
+    <div class="collapsible-body" id="preflop-body">
+      <div id="preflop-tier-wrap" style="margin-bottom:1.2rem">
+        <div class="preflop-label">HAND STRENGTH</div>
+        <div id="preflop-tier-result" class="tier-empty">Select your hole cards first</div>
+      </div>
+      <div class="preflop-label" style="margin-bottom:0.6rem">YOUR POSITION</div>
+      <div class="position-row" id="position-row">
+        <button class="pos-btn" data-pos="UTG"  onclick="selectPosition(this)">UTG</button>
+        <button class="pos-btn" data-pos="MP"   onclick="selectPosition(this)">MP</button>
+        <button class="pos-btn" data-pos="HJ"   onclick="selectPosition(this)">HJ</button>
+        <button class="pos-btn" data-pos="CO"   onclick="selectPosition(this)">CO</button>
+        <button class="pos-btn" data-pos="BTN"  onclick="selectPosition(this)">BTN</button>
+        <button class="pos-btn" data-pos="SB"   onclick="selectPosition(this)">SB</button>
+        <button class="pos-btn" data-pos="BB"   onclick="selectPosition(this)">BB</button>
+      </div>
+      <div id="position-action" class="pos-action-empty">Select a position</div>
     </div>
   </div>
 
@@ -1161,6 +1334,9 @@ function displayOdds(result, label, outs, streetLabel) {
   content.classList.add('stats-animate');
 
   calcPotOdds();
+  // Refresh collapsible panels if open
+  if (document.getElementById('rankings-body').classList.contains('open')) buildRankingsTable();
+  if (document.getElementById('preflop-body').classList.contains('open'))  updatePreflop();
 }
 
 function drawSparkline() {
@@ -1235,6 +1411,168 @@ function calcPotOdds() {
     resultEl.textContent = `✗ Unprofitable (need ${potOddsPct.toFixed(1)}%, have ${winPct.toFixed(1)}%)`;
     resultEl.className = 'pot-result unprofitable';
   }
+}
+
+// ═══════════════════════════════════════════════════
+//  COLLAPSIBLE
+// ═══════════════════════════════════════════════════
+function toggleSection(id) {
+  const body  = document.getElementById(id + '-body');
+  const arrow = document.getElementById(id + '-arrow');
+  const open  = body.classList.toggle('open');
+  arrow.classList.toggle('open', open);
+  if (id === 'rankings') buildRankingsTable();
+  if (id === 'preflop')  updatePreflop();
+}
+
+// ═══════════════════════════════════════════════════
+//  HAND RANKINGS CHART
+// ═══════════════════════════════════════════════════
+const HAND_CHART = [
+  { name: 'Royal Flush',      rank: 9, example: [['A','♠'],['K','♠'],['Q','♠'],['J','♠'],['10','♠']], suits: ['b','b','b','b','b'] },
+  { name: 'Straight Flush',   rank: 8, example: [['9','♥'],['8','♥'],['7','♥'],['6','♥'],['5','♥']], suits: ['r','r','r','r','r'] },
+  { name: 'Four of a Kind',   rank: 7, example: [['K','♠'],['K','♥'],['K','♦'],['K','♣'],['2','♠']], suits: ['b','r','r','b','b'] },
+  { name: 'Full House',       rank: 6, example: [['Q','♠'],['Q','♥'],['Q','♣'],['J','♦'],['J','♥']], suits: ['b','r','b','r','r'] },
+  { name: 'Flush',            rank: 5, example: [['A','♦'],['J','♦'],['8','♦'],['5','♦'],['2','♦']], suits: ['r','r','r','r','r'] },
+  { name: 'Straight',         rank: 4, example: [['9','♠'],['8','♥'],['7','♦'],['6','♣'],['5','♠']], suits: ['b','r','r','b','b'] },
+  { name: 'Three of a Kind',  rank: 3, example: [['T','♠'],['T','♥'],['T','♦'],['K','♣'],['2','♠']], suits: ['b','r','r','b','b'] },
+  { name: 'Two Pair',         rank: 2, example: [['A','♠'],['A','♥'],['8','♦'],['8','♣'],['K','♠']], suits: ['b','r','r','b','b'] },
+  { name: 'One Pair',         rank: 1, example: [['J','♠'],['J','♣'],['A','♥'],['7','♦'],['2','♠']], suits: ['b','b','r','r','b'] },
+  { name: 'High Card',        rank: 0, example: [['A','♠'],['K','♥'],['J','♦'],['8','♣'],['2','♠']], suits: ['b','r','r','b','b'] },
+];
+
+function buildRankingsTable() {
+  const table = document.getElementById('rankings-table');
+  // Determine current hand rank
+  const board = [...community.flop, ...community.turn, ...community.river];
+  let currentRank = -1;
+  if (holeCards.length === 2 && board.length >= 3) {
+    currentRank = evaluate([...holeCards, ...board])[0];
+  } else if (holeCards.length === 2 && board.length === 0) {
+    // Pre-flop: check for pair
+    if (holeCards[0].rank === holeCards[1].rank) currentRank = 1;
+    else currentRank = 0;
+  }
+
+  table.innerHTML = HAND_CHART.map((h, i) => {
+    const isActive = h.rank === currentRank && currentRank >= 0;
+    const exHtml = h.example.map((card, ci) =>
+      `<span class="${h.suits[ci] === 'r' ? 'r' : 'b'}">${card[0]}${card[1]}</span>`
+    ).join(' ');
+    return `<tr class="${isActive ? 'active-hand' : ''}">
+      <td class="rank-num">${i + 1}</td>
+      <td class="rank-name ${isActive ? 'active-name' : ''}">${h.name}</td>
+      <td class="rank-example">${exHtml}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════
+//  PREFLOP GTO
+// ═══════════════════════════════════════════════════
+// Tier definitions: key = canonical hand string (e.g. "AKs", "99", "ATo")
+// s = suited, o = offsuit, pairs = just rank twice
+const TIER_PREMIUM  = new Set(['AA','KK','QQ','JJ','AKs','AKo']);
+const TIER_STRONG   = new Set(['TT','99','AQs','AQo','AJs','KQs','ATs','KJs']);
+const TIER_PLAYABLE = new Set(['88','77','AJo','ATo','A9s','A8s','KQo','KTs','KJo','QJs','JTs','T9s','98s']);
+const TIER_MARGINAL = new Set(['66','55','44','33','22','A7s','A6s','A5s','A4s','A3s','A2s','A9o','KTo','K9s','QTs','QJo','J9s','T8s','97s','87s','76s','65s','54s']);
+
+// GTO open-raise ranges per position (set of canonical hand strings)
+const GTO_RANGES = {
+  UTG: new Set([...TIER_PREMIUM, ...TIER_STRONG, 'TT','99','ATs','AJs','KQs','KJs']),
+  MP:  new Set([...TIER_PREMIUM, ...TIER_STRONG, 'TT','99','88','ATo','KQo','KTs','QJs','JTs']),
+  HJ:  new Set([...TIER_PREMIUM, ...TIER_STRONG, 'TT','99','88','77','ATo','A9s','KQo','KTo','QJo','QTs','JTs','T9s','98s']),
+  CO:  new Set([...TIER_PREMIUM, ...TIER_STRONG, 'TT','99','88','77','66','ATo','A9s','A8s','KQo','KTo','K9s','QJo','QTs','JTs','T9s','98s','87s']),
+  BTN: new Set([...TIER_PREMIUM, ...TIER_STRONG, ...TIER_PLAYABLE, ...TIER_MARGINAL]),
+  SB:  new Set([...TIER_PREMIUM, ...TIER_STRONG, 'TT','99','88','77','66','ATo','A9s','A8s','A7s','KQo','KTs','KJo','QJs','JTs','T9s','98s','87s','76s']),
+  BB:  new Set([...TIER_PREMIUM, ...TIER_STRONG, ...TIER_PLAYABLE]),
+};
+
+const TIER_DESC = {
+  premium:  ['Premium',  'tier-premium',  'Raise from any position'],
+  strong:   ['Strong',   'tier-strong',   'Raise from most positions'],
+  playable: ['Playable', 'tier-playable', 'Raise in position, consider calling OOP'],
+  marginal: ['Marginal', 'tier-marginal', 'Raise BTN/CO only, fold to 3-bets'],
+  fold:     ['Fold',     'tier-fold',     'Generally fold preflop'],
+};
+
+const POS_DESC = {
+  raise: ['↑ Raise', 'pos-raise'],
+  call:  ['→ Call',  'pos-call'],
+  fold:  ['↓ Fold',  'pos-fold'],
+};
+
+let selectedPosition = null;
+
+function canonicalHand(h1, h2) {
+  const ORDER = { 'A':14,'K':13,'Q':12,'J':11,'10':10,'T':10,'9':9,'8':8,'7':7,'6':6,'5':5,'4':4,'3':3,'2':2 };
+  const v1 = ORDER[h1.rank] || 0, v2 = ORDER[h2.rank] || 0;
+  const [hi, lo] = v1 >= v2 ? [h1, h2] : [h2, h1];
+  if (hi.rank === lo.rank) return hi.rank + lo.rank; // pair
+  const suited = hi.suit === lo.suit ? 's' : 'o';
+  // normalize T
+  const r1 = hi.rank === '10' ? 'T' : hi.rank;
+  const r2 = lo.rank === '10' ? 'T' : lo.rank;
+  return r1 + r2 + suited;
+}
+
+function getHandTier(canonical) {
+  if (TIER_PREMIUM.has(canonical))  return 'premium';
+  if (TIER_STRONG.has(canonical))   return 'strong';
+  if (TIER_PLAYABLE.has(canonical)) return 'playable';
+  if (TIER_MARGINAL.has(canonical)) return 'marginal';
+  return 'fold';
+}
+
+function selectPosition(btn) {
+  document.querySelectorAll('.pos-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  selectedPosition = btn.dataset.pos;
+  updatePosAction();
+}
+
+function updatePreflop() {
+  updateTierBadge();
+  updatePosAction();
+}
+
+function updateTierBadge() {
+  const el = document.getElementById('preflop-tier-result');
+  if (holeCards.length < 2) {
+    el.className = 'tier-empty';
+    el.innerHTML = 'Select your hole cards first';
+    return;
+  }
+  const canon = canonicalHand(holeCards[0], holeCards[1]);
+  const tier = getHandTier(canon);
+  const [label, cls, desc] = TIER_DESC[tier];
+  el.className = '';
+  el.innerHTML = `<span class="tier-badge ${cls}">${label}</span><div class="tier-desc">${desc}</div>`;
+}
+
+function updatePosAction() {
+  const el = document.getElementById('position-action');
+  if (!selectedPosition) {
+    el.className = 'pos-action-empty';
+    el.textContent = 'Select a position';
+    return;
+  }
+  if (holeCards.length < 2) {
+    el.className = 'pos-action-empty';
+    el.textContent = 'Select your hole cards first';
+    return;
+  }
+  const canon = canonicalHand(holeCards[0], holeCards[1]);
+  const range = GTO_RANGES[selectedPosition];
+  const tier  = getHandTier(canon);
+  let action;
+  if (range.has(canon))         action = 'raise';
+  else if (tier === 'fold')     action = 'fold';
+  else if (selectedPosition === 'BB') action = 'call';  // BB defends wide
+  else                          action = 'fold';
+  const [label, cls] = POS_DESC[action];
+  el.className = '';
+  el.innerHTML = `<span class="pos-action ${cls}">${label}</span>`;
 }
 </script>
 </body>
