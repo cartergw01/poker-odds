@@ -306,52 +306,101 @@
   }
   .modal-box input:focus { border-color: rgba(212,168,32,0.6); }
 
-  /* Picker modal */
-  #picker-modal { z-index: 999; }
-  .picker-box {
-    border-radius: 20px;
-    padding: 1.6rem;
-    max-width: 370px; width: 94%;
+  /* ── FAST CARD PICKER (type-to-add) ── */
+  #picker-modal {
+    z-index: 999;
+    align-items: flex-end;
   }
-  .picker-box h3 {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.15rem;
-    color: var(--gold-light);
+  .picker-sheet {
+    width: 100%; max-width: 480px;
+    border-radius: 22px 22px 0 0;
+    padding: 1.4rem 1.2rem 2rem;
+    background: rgba(5,16,9,0.97);
+    backdrop-filter: blur(40px);
+    border: 1px solid rgba(212,168,32,0.18);
+    border-bottom: none;
+    box-shadow: 0 -8px 40px rgba(0,0,0,0.7);
+    animation: sheetUp 0.2s cubic-bezier(0.22,1,0.36,1);
+  }
+  @keyframes sheetUp {
+    from { transform: translateY(60px); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+  }
+  .picker-sheet-header {
+    display: flex; align-items: center; justify-content: space-between;
     margin-bottom: 1.1rem;
-    letter-spacing: 0.02em;
   }
-  .picker-ranks, .picker-suits {
-    display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 1rem;
+  .picker-sheet-title {
+    font-size: 0.6rem; letter-spacing: 0.22em;
+    color: var(--gold); opacity: 0.65; text-transform: uppercase;
   }
-  .rank-btn, .suit-btn {
-    width: 44px; height: 44px;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 10px;
+  .picker-cancel-btn {
+    background: none; border: none; color: var(--muted);
+    font-size: 0.8rem; cursor: pointer; padding: 0.2rem 0.4rem;
+    opacity: 0.55; transition: opacity 0.15s; line-height: 1;
+    font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.06em;
+  }
+  .picker-cancel-btn:hover { opacity: 1; }
+
+  .picker-input-row {
+    display: flex; gap: 0.6rem; align-items: stretch;
+  }
+  .picker-text-input {
+    flex: 1;
+    background: rgba(255,255,255,0.06);
+    border: 1.5px solid rgba(212,168,32,0.3);
+    border-radius: 12px;
     color: var(--cream);
-    font-family: 'Playfair Display', serif;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: all 0.15s;
-    display: flex; align-items: center; justify-content: center;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 1.6rem; font-weight: 700;
+    letter-spacing: 0.08em;
+    padding: 0.6rem 1rem;
+    outline: none;
+    text-transform: uppercase;
+    transition: border-color 0.15s;
+    caret-color: var(--gold);
   }
-  .rank-btn:hover:not(:disabled), .suit-btn:hover:not(:disabled) {
-    border-color: rgba(212,168,32,0.5);
+  .picker-text-input::placeholder {
+    color: rgba(255,255,255,0.18); font-size: 1rem; font-weight: 400; letter-spacing: 0.04em;
+  }
+  .picker-text-input:focus { border-color: rgba(212,168,32,0.65); }
+  .picker-text-input.input-error { border-color: rgba(232,51,74,0.7); animation: inputShake 0.3s ease; }
+  @keyframes inputShake {
+    0%,100% { transform: translateX(0); }
+    25%      { transform: translateX(-6px); }
+    75%      { transform: translateX(6px); }
+  }
+  .picker-add-btn {
+    background: rgba(212,168,32,0.15);
+    border: 1.5px solid rgba(212,168,32,0.4);
+    border-radius: 12px;
     color: var(--gold-light);
-    background: rgba(212,168,32,0.1);
-    transform: scale(1.06);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.75rem; font-weight: 600; letter-spacing: 0.1em;
+    padding: 0 1.2rem; cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
   }
-  .rank-btn.selected, .suit-btn.selected {
-    background: linear-gradient(145deg, #e8c030, #b08010);
-    color: #0a0800;
-    border-color: var(--gold);
-    box-shadow: 0 0 16px rgba(212,168,32,0.5);
-    transform: scale(1.06);
+  .picker-add-btn:hover { background: rgba(212,168,32,0.28); border-color: rgba(212,168,32,0.7); }
+
+  .picker-hint {
+    margin-top: 0.75rem;
+    font-size: 0.62rem; color: var(--muted); letter-spacing: 0.06em;
+    line-height: 1.6;
   }
-  .rank-btn:disabled, .suit-btn:disabled { opacity: 0.2; cursor: not-allowed; }
-  .suit-btn.hearts, .suit-btn.diamonds { color: var(--red); }
-  .suit-btn.hearts.selected, .suit-btn.diamonds.selected { color: #1a0000; }
-  .picker-actions { display: flex; gap: 0.6rem; justify-content: flex-end; margin-top: 0.4rem; }
+  .picker-hint span { color: var(--gold); opacity: 0.75; }
+  .picker-preview {
+    margin-top: 0.8rem; min-height: 1.2rem;
+    font-size: 0.72rem; letter-spacing: 0.08em;
+    transition: all 0.15s;
+  }
+  .picker-preview.valid   { color: var(--win); }
+  .picker-preview.invalid { color: var(--loss); }
+  .picker-preview.taken   { color: #f0b830; }
+
+  body.light .picker-sheet { background: rgba(248,244,234,0.98); border-color: rgba(154,98,0,0.2); }
+  body.light .picker-text-input { background: rgba(0,0,0,0.05); border-color: rgba(154,98,0,0.3); color: var(--cream); }
+  body.light .picker-text-input:focus { border-color: rgba(154,98,0,0.6); }
 
 
   /* ── PLAYERS (compact header) ── */
@@ -906,6 +955,208 @@
   .theme-toggle:hover { opacity: 1; border-color: rgba(212,168,32,0.6); }
   .theme-toggle .toggle-icon { font-size: 0.85rem; }
 
+  /* ── LIVE DECISION DASHBOARD ── */
+  .dash-reopen-btn {
+    display: none;
+    align-items: center; gap: 0.4rem;
+    margin: 0 auto 0.8rem;
+    background: none; border: 1px solid rgba(212,168,32,0.25);
+    border-radius: 20px; padding: 0.28rem 0.9rem;
+    font-family: 'IBM Plex Mono', monospace; font-size: 0.6rem;
+    letter-spacing: 0.14em; color: var(--gold); opacity: 0.55;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .dash-reopen-btn:hover { opacity: 1; border-color: rgba(212,168,32,0.55); }
+  .dash-reopen-btn.visible { display: flex; }
+
+  .live-dashboard {
+    border-radius: 18px;
+    padding: 1.1rem 1.3rem 1.2rem;
+    margin-bottom: 1rem;
+    border: 1px solid rgba(212,168,32,0.18);
+    border-top-color: rgba(212,168,32,0.32);
+    background: rgba(4,14,8,0.8);
+    transition: opacity 0.2s;
+  }
+  .live-dashboard.dash-hidden { display: none; }
+
+  .dash-toprow {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 0.9rem;
+  }
+  .dash-eyebrow {
+    font-size: 0.58rem; letter-spacing: 0.26em;
+    color: var(--gold); opacity: 0.55;
+    text-transform: uppercase;
+  }
+  .dash-close-btn {
+    background: none; border: none; color: var(--muted);
+    font-size: 0.75rem; cursor: pointer; opacity: 0.5;
+    padding: 0.1rem 0.3rem; line-height: 1;
+    transition: opacity 0.15s;
+  }
+  .dash-close-btn:hover { opacity: 1; color: var(--cream); }
+
+  .dash-body {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr 1fr;
+    gap: 1rem;
+    align-items: start;
+  }
+
+  /* Left col — hand state */
+  .dash-hand-state { display: flex; flex-direction: column; gap: 0.45rem; }
+  .dash-mini-label {
+    font-size: 0.55rem; letter-spacing: 0.2em;
+    color: var(--gold); opacity: 0.5; text-transform: uppercase;
+  }
+  .dash-mini-cards { display: flex; gap: 0.3rem; flex-wrap: wrap; }
+  .dash-mini-card {
+    width: 34px; height: 48px;
+    border-radius: 5px;
+    border: 1px solid rgba(255,255,255,0.15);
+    background: #fff;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 0; line-height: 1;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+  }
+  .dash-mini-card.small { width: 25px; height: 36px; }
+  .dash-mini-card.empty {
+    background: rgba(255,255,255,0.04);
+    border-style: dashed; border-color: rgba(255,255,255,0.12);
+    color: rgba(255,255,255,0.18); font-size: 0.8rem;
+  }
+  .dash-mini-card.empty.small { font-size: 0.6rem; }
+  .dmc-rank {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.72rem; font-weight: 700; line-height: 1.1;
+  }
+  .dmc-suit { font-size: 0.6rem; line-height: 1; }
+  .dash-mini-card.small .dmc-rank { font-size: 0.55rem; }
+  .dash-mini-card.small .dmc-suit { font-size: 0.48rem; }
+  .dash-mini-card.red .dmc-rank,
+  .dash-mini-card.red .dmc-suit { color: #cc1122; }
+  .dash-mini-card.black .dmc-rank,
+  .dash-mini-card.black .dmc-suit { color: #111; }
+
+  .dash-pills {
+    display: flex; gap: 0.3rem; flex-wrap: wrap; margin-top: 0.1rem;
+  }
+  .dash-pill {
+    font-size: 0.56rem; letter-spacing: 0.1em;
+    padding: 0.2rem 0.5rem; border-radius: 20px;
+    border: 1px solid rgba(212,168,32,0.22);
+    color: var(--gold); opacity: 0.75;
+    background: rgba(212,168,32,0.06);
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .dash-pill.active { opacity: 1; border-color: rgba(212,168,32,0.5); background: rgba(212,168,32,0.12); }
+
+  /* Center col — metrics */
+  .dash-metrics { display: flex; flex-direction: column; gap: 0.55rem; }
+  .dash-metric-pair {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;
+  }
+  .dash-metric {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 10px;
+    padding: 0.55rem 0.7rem;
+    display: flex; flex-direction: column; gap: 0.15rem;
+  }
+  .dash-metric-label {
+    font-size: 0.52rem; letter-spacing: 0.18em;
+    color: var(--muted); text-transform: uppercase;
+  }
+  .dash-metric-val {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 1.2rem; font-weight: 700; line-height: 1;
+    color: var(--cream);
+  }
+  .dash-metric-val.win-color  { color: var(--win); }
+  .dash-metric-val.loss-color { color: var(--loss); }
+  .dash-metric-val.edge-pos   { color: var(--win); }
+  .dash-metric-val.edge-neg   { color: var(--loss); }
+  .dash-metric-val.muted-val  { color: var(--muted); }
+  .dash-hand-name {
+    font-size: 0.7rem; color: var(--gold-light); opacity: 0.8;
+    text-align: center; letter-spacing: 0.06em;
+    font-family: 'Playfair Display', serif;
+    padding: 0.3rem 0; border-top: 1px solid rgba(255,255,255,0.06);
+  }
+
+  /* Right col — verdict */
+  .dash-verdict-col {
+    display: flex; flex-direction: column; align-items: center;
+    gap: 0.7rem; text-align: center; padding-top: 0.2rem;
+  }
+  .dash-verdict-badge {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.9rem; font-weight: 700; letter-spacing: 0.16em;
+    padding: 0.6rem 1.2rem; border-radius: 30px;
+    text-transform: uppercase; min-width: 110px;
+    transition: all 0.3s ease;
+  }
+  .dash-verdict-badge.v-neutral {
+    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+    color: var(--muted);
+  }
+  .dash-verdict-badge.v-call {
+    background: rgba(31,219,110,0.15); border: 1px solid rgba(31,219,110,0.4);
+    color: #1fdb6e; box-shadow: 0 0 18px rgba(31,219,110,0.15);
+  }
+  .dash-verdict-badge.v-raise {
+    background: rgba(212,168,32,0.18); border: 1px solid rgba(212,168,32,0.5);
+    color: var(--gold-light); box-shadow: 0 0 18px rgba(212,168,32,0.18);
+  }
+  .dash-verdict-badge.v-fold {
+    background: rgba(232,51,74,0.15); border: 1px solid rgba(232,51,74,0.4);
+    color: #e8334a; box-shadow: 0 0 18px rgba(232,51,74,0.15);
+  }
+  .dash-verdict-badge.v-marginal {
+    background: rgba(232,160,32,0.15); border: 1px solid rgba(232,160,32,0.4);
+    color: #f0b830;
+  }
+  .dash-verdict-badge.v-favorable {
+    background: rgba(31,219,110,0.08); border: 1px solid rgba(31,219,110,0.25);
+    color: #80e8a8;
+  }
+  .dash-verdict-reason {
+    font-size: 0.67rem; color: var(--muted); line-height: 1.5;
+    max-width: 160px;
+  }
+
+  /* Divider between cols */
+  .dash-divider {
+    width: 1px; background: rgba(255,255,255,0.07);
+    align-self: stretch; margin: 0;
+  }
+
+  /* Mobile stacking */
+  @media (max-width: 600px) {
+    .dash-body {
+      grid-template-columns: 1fr;
+      gap: 0.9rem;
+    }
+    .dash-divider { width: 100%; height: 1px; }
+    .dash-verdict-col { flex-direction: row; align-items: center; text-align: left; gap: 0.8rem; }
+    .dash-verdict-reason { max-width: none; }
+    .dash-metric-val { font-size: 1rem; }
+  }
+
+  /* Light mode dashboard overrides */
+  body.light .live-dashboard { background: rgba(255,252,244,0.88); border-color: rgba(154,98,0,0.2); border-top-color: rgba(154,98,0,0.35); }
+  body.light .dash-metric { background: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.08); }
+  body.light .dash-divider { background: rgba(0,0,0,0.08); }
+  body.light .dash-mini-card.empty { background: rgba(0,0,0,0.05); border-color: rgba(0,0,0,0.15); color: rgba(0,0,0,0.2); }
+  body.light .dash-verdict-badge.v-neutral { background: rgba(0,0,0,0.05); border-color: rgba(0,0,0,0.12); }
+  body.light .dash-metric-val.win-color  { color: var(--win); }
+  body.light .dash-metric-val.loss-color { color: var(--loss); }
+  body.light .dash-hand-name { color: var(--gold); border-color: rgba(0,0,0,0.08); }
+  body.light .dash-verdict-reason { color: var(--muted); }
+
   /* ── CHIP RAIN CANVAS ── */
   #chip-canvas {
     position: fixed; top: 0; left: 0;
@@ -919,20 +1170,33 @@
 
 <canvas id="chip-canvas"></canvas>
 
-<!-- Card Picker Modal -->
+<!-- Card Picker — Type to Add -->
 <div id="picker-modal" class="modal-overlay hidden">
-  <div class="picker-box glass">
-    <h3>Select Card</h3>
-    <div class="picker-ranks" id="picker-ranks"></div>
-    <div class="picker-suits" id="picker-suits">
-      <button class="suit-btn spades" data-suit="spades" onclick="selectSuit(this)">♠</button>
-      <button class="suit-btn hearts" data-suit="hearts" onclick="selectSuit(this)">♥</button>
-      <button class="suit-btn diamonds" data-suit="diamonds" onclick="selectSuit(this)">♦</button>
-      <button class="suit-btn clubs" data-suit="clubs" onclick="selectSuit(this)">♣</button>
+  <div class="picker-sheet">
+    <div class="picker-sheet-header">
+      <span class="picker-sheet-title" id="picker-sheet-title">Add Card</span>
+      <button class="picker-cancel-btn" onclick="closePicker()">✕ Cancel</button>
     </div>
-    <div class="picker-actions">
-      <button class="btn" onclick="closePicker()">Cancel</button>
-      <button class="btn primary" id="picker-confirm" onclick="confirmPicker()" disabled>Add Card</button>
+    <div class="picker-input-row">
+      <input
+        id="picker-text-input"
+        class="picker-text-input"
+        type="text"
+        maxlength="3"
+        placeholder="e.g. Ah, Ks, 10d"
+        autocomplete="off"
+        autocorrect="off"
+        autocapitalize="characters"
+        spellcheck="false"
+        oninput="onPickerInput(this)"
+        onkeydown="onPickerKey(event)"
+      >
+      <button class="picker-add-btn" id="picker-add-btn" onclick="submitPickerInput()">ADD</button>
+    </div>
+    <div class="picker-preview" id="picker-preview"></div>
+    <div class="picker-hint">
+      Rank: <span>A K Q J 10 9 … 2</span> &nbsp;·&nbsp; Suit: <span>s h d c</span><br>
+      Examples: <span>As</span> = Ace of Spades &nbsp; <span>10h</span> = Ten of Hearts
     </div>
   </div>
 </div>
@@ -953,6 +1217,70 @@
       <button class="stepper-btn" onclick="adjustPlayers(1)">＋</button>
     </div>
   </header>
+
+  <!-- Dashboard reopen button (shown when dashboard is closed) -->
+  <div style="text-align:center">
+    <button class="dash-reopen-btn" id="dash-reopen-btn" onclick="toggleDashboard()">⊞ COCKPIT</button>
+  </div>
+
+  <!-- Live Decision Dashboard -->
+  <div id="live-dashboard" class="live-dashboard glass">
+    <div class="dash-toprow">
+      <div class="dash-eyebrow">Live Decision Dashboard</div>
+      <button class="dash-close-btn" onclick="toggleDashboard()" title="Hide">✕</button>
+    </div>
+    <div class="dash-body">
+
+      <!-- Left: Hand State -->
+      <div class="dash-hand-state">
+        <div class="dash-mini-label">Pocket Cards</div>
+        <div class="dash-mini-cards" id="dash-hole-cards"></div>
+        <div class="dash-mini-label" style="margin-top:0.5rem">Board</div>
+        <div class="dash-mini-cards" id="dash-board-cards"></div>
+        <div class="dash-pills" id="dash-pills">
+          <span class="dash-pill" id="dash-pill-street">PREFLOP</span>
+          <span class="dash-pill" id="dash-pill-pos">— POS</span>
+          <span class="dash-pill" id="dash-pill-players">4P</span>
+        </div>
+      </div>
+
+      <div class="dash-divider"></div>
+
+      <!-- Center: Metrics -->
+      <div class="dash-metrics">
+        <div class="dash-metric-pair">
+          <div class="dash-metric">
+            <span class="dash-metric-label">Win</span>
+            <span class="dash-metric-val win-color" id="dash-win">—</span>
+          </div>
+          <div class="dash-metric">
+            <span class="dash-metric-label">Loss</span>
+            <span class="dash-metric-val loss-color" id="dash-loss">—</span>
+          </div>
+        </div>
+        <div class="dash-metric-pair">
+          <div class="dash-metric">
+            <span class="dash-metric-label">Pot Odds</span>
+            <span class="dash-metric-val muted-val" id="dash-pot-odds-val">—</span>
+          </div>
+          <div class="dash-metric">
+            <span class="dash-metric-label">Edge</span>
+            <span class="dash-metric-val muted-val" id="dash-edge-val">—</span>
+          </div>
+        </div>
+        <div class="dash-hand-name" id="dash-hand-name">—</div>
+      </div>
+
+      <div class="dash-divider"></div>
+
+      <!-- Right: Verdict -->
+      <div class="dash-verdict-col">
+        <div class="dash-verdict-badge v-neutral" id="dash-verdict-badge">—</div>
+        <div class="dash-verdict-reason" id="dash-verdict-reason">Enter your pocket cards to begin</div>
+      </div>
+
+    </div>
+  </div>
 
   <!-- Hole Cards -->
   <div class="section glass">
@@ -1278,6 +1606,147 @@
 })();
 
 // ═══════════════════════════════════════════════════
+//  LIVE DECISION DASHBOARD
+// ═══════════════════════════════════════════════════
+function toggleDashboard() {
+  const dash = document.getElementById('live-dashboard');
+  const reopen = document.getElementById('dash-reopen-btn');
+  const hidden = dash.classList.toggle('dash-hidden');
+  if (hidden) reopen.classList.add('visible');
+  else reopen.classList.remove('visible');
+}
+
+function renderDashCards() {
+  const holeWrap  = document.getElementById('dash-hole-cards');
+  const boardWrap = document.getElementById('dash-board-cards');
+  if (!holeWrap) return;
+
+  holeWrap.innerHTML = '';
+  for (let i = 0; i < 2; i++) {
+    const c = holeCards[i];
+    if (c) {
+      const isRed = RED_SUITS.has(c.suit);
+      holeWrap.innerHTML += `<div class="dash-mini-card ${isRed?'red':'black'}">
+        <span class="dmc-rank">${c.rank}</span><span class="dmc-suit">${SUIT_SYM[c.suit]}</span>
+      </div>`;
+    } else {
+      holeWrap.innerHTML += `<div class="dash-mini-card empty">?</div>`;
+    }
+  }
+
+  const boardCards = [...community.flop, ...community.turn, ...community.river];
+  boardWrap.innerHTML = '';
+  for (let i = 0; i < 5; i++) {
+    const c = boardCards[i];
+    if (c) {
+      const isRed = RED_SUITS.has(c.suit);
+      boardWrap.innerHTML += `<div class="dash-mini-card small ${isRed?'red':'black'}">
+        <span class="dmc-rank">${c.rank}</span><span class="dmc-suit">${SUIT_SYM[c.suit]}</span>
+      </div>`;
+    } else {
+      boardWrap.innerHTML += `<div class="dash-mini-card empty small">·</div>`;
+    }
+  }
+}
+
+function updateDashboard() {
+  renderDashCards();
+
+  // Pills
+  const street = currentStreetLabel();
+  const streetPill = document.getElementById('dash-pill-street');
+  const posPill    = document.getElementById('dash-pill-pos');
+  const playPill   = document.getElementById('dash-pill-players');
+  if (streetPill) {
+    streetPill.textContent = street;
+    streetPill.className = 'dash-pill active';
+  }
+  if (posPill) {
+    posPill.textContent = selectedPosition || '— POS';
+    posPill.className = 'dash-pill' + (selectedPosition ? ' active' : '');
+  }
+  if (playPill) {
+    playPill.textContent = numPlayers + 'P';
+  }
+
+  // Win / Loss
+  const winEl  = document.getElementById('win-pct');
+  const lossEl = document.getElementById('loss-pct');
+  const winPct  = winEl  ? parseFloat(winEl.textContent)  : NaN;
+  const lossPct = lossEl ? parseFloat(lossEl.textContent) : NaN;
+  const dashWin  = document.getElementById('dash-win');
+  const dashLoss = document.getElementById('dash-loss');
+  if (dashWin)  dashWin.textContent  = isNaN(winPct)  ? '—' : winPct.toFixed(1)  + '%';
+  if (dashLoss) dashLoss.textContent = isNaN(lossPct) ? '—' : lossPct.toFixed(1) + '%';
+
+  // Pot odds & edge
+  const pot  = parseFloat(document.getElementById('pot-size')?.value)  || 0;
+  const call = parseFloat(document.getElementById('call-amount')?.value) || 0;
+  let potOddsPct = NaN;
+  if (pot > 0 && call > 0) potOddsPct = call / (pot + call) * 100;
+
+  const poEl = document.getElementById('dash-pot-odds-val');
+  const edgeEl = document.getElementById('dash-edge-val');
+  if (poEl) {
+    poEl.textContent = isNaN(potOddsPct) ? '—' : potOddsPct.toFixed(1) + '%';
+    poEl.className = 'dash-metric-val' + (isNaN(potOddsPct) ? ' muted-val' : '');
+  }
+  if (edgeEl) {
+    if (!isNaN(winPct) && !isNaN(potOddsPct)) {
+      const edge = winPct - potOddsPct;
+      edgeEl.textContent = (edge >= 0 ? '+' : '') + edge.toFixed(1) + '%';
+      edgeEl.className = 'dash-metric-val ' + (edge > 1.5 ? 'edge-pos' : edge < -1.5 ? 'edge-neg' : 'muted-val');
+    } else {
+      edgeEl.textContent = '—';
+      edgeEl.className = 'dash-metric-val muted-val';
+    }
+  }
+
+  // Hand name
+  const hnEl = document.getElementById('dash-hand-name');
+  const srcHn = document.getElementById('hand-label');
+  if (hnEl && srcHn) hnEl.textContent = srcHn.textContent || '—';
+
+  // Verdict
+  const edge = (!isNaN(winPct) && !isNaN(potOddsPct)) ? (winPct - potOddsPct) : NaN;
+  setVerdict(winPct, potOddsPct, edge);
+}
+
+function setVerdict(winPct, potOddsPct, edge) {
+  const badge  = document.getElementById('dash-verdict-badge');
+  const reason = document.getElementById('dash-verdict-reason');
+  if (!badge || !reason) return;
+
+  function set(text, cls, msg) {
+    badge.textContent = text;
+    badge.className = 'dash-verdict-badge ' + cls;
+    reason.textContent = msg;
+  }
+
+  if (holeCards.length < 2) {
+    return set('—', 'v-neutral', 'Enter your pocket cards to begin');
+  }
+  if (isNaN(winPct)) {
+    return set('...', 'v-neutral', 'Running simulation');
+  }
+
+  // No pot/call entered yet — equity-only verdicts
+  if (isNaN(potOddsPct)) {
+    if (winPct >= 72)      return set('RAISE', 'v-raise',     'Dominant equity — raise to build the pot');
+    if (winPct >= 52)      return set('FAVORABLE', 'v-favorable', 'Above 50% equity — add pot & call for full read');
+    if (winPct >= 36)      return set('MARGINAL', 'v-marginal', 'Moderate equity — enter pot & call to complete analysis');
+    return                        set('CAUTION', 'v-fold',    'Low equity — enter pot & call to evaluate');
+  }
+
+  // Full pot-odds verdict
+  if (edge > 12)           return set('RAISE', 'v-raise',     `Equity crushes pot odds by ${edge.toFixed(1)}% — extract value`);
+  if (edge > 4)            return set('CALL',  'v-call',      `+EV: equity beats pot odds by ${edge.toFixed(1)}%`);
+  if (edge >= -4)          return set('MARGINAL', 'v-marginal', `Near break-even — weigh position & reads`);
+  if (edge >= -12)         return set('FOLD',  'v-fold',      `Equity trails pot odds by ${Math.abs(edge).toFixed(1)}% — likely -EV`);
+                           return set('FOLD',  'v-fold',      `Clear fold — equity misses pot odds by ${Math.abs(edge).toFixed(1)}%`);
+}
+
+// ═══════════════════════════════════════════════════
 //  THEME TOGGLE
 // ═══════════════════════════════════════════════════
 function toggleTheme() {
@@ -1294,8 +1763,6 @@ let holeCards = [];
 let community = { flop: [], turn: [], river: [] };
 let numPlayers = 4;
 let pickerTarget = null;
-let pickerRank = null;
-let pickerSuit = null;
 let calcTimeout = null;
 let equityHistory = []; // [{label, pct}]
 let prevWinPct = null;  // track previous win% for delta display
@@ -1309,23 +1776,29 @@ const RED_SUITS = new Set(['hearts','diamonds']);
 //  INIT
 // ═══════════════════════════════════════════════════
 window.addEventListener('load', () => {
-  buildRankButtons();
   renderAll();
+  updateDashboard();
 });
 
 // ═══════════════════════════════════════════════════
-//  CARD PICKER
+//  CARD PICKER — TYPE TO ADD
 // ═══════════════════════════════════════════════════
-function buildRankButtons() {
-  const container = document.getElementById('picker-ranks');
-  RANKS.forEach(r => {
-    const btn = document.createElement('button');
-    btn.className = 'rank-btn';
-    btn.dataset.rank = r;
-    btn.textContent = r;
-    btn.onclick = () => selectRank(btn);
-    container.appendChild(btn);
-  });
+const RANK_ALIASES = {
+  'A':'A','K':'K','Q':'Q','J':'J','T':'10','10':'10',
+  '2':'2','3':'3','4':'4','5':'5','6':'6','7':'7','8':'8','9':'9'
+};
+const SUIT_ALIASES = { 'S':'spades','H':'hearts','D':'diamonds','C':'clubs' };
+
+function parseCardInput(raw) {
+  const s = raw.trim().toUpperCase();
+  if (!s) return null;
+  // Suit is always the last character
+  const suitChar = s.slice(-1);
+  const rankStr  = s.slice(0, -1);
+  const suit = SUIT_ALIASES[suitChar];
+  const rank = RANK_ALIASES[rankStr];
+  if (!suit || !rank) return null;
+  return { rank, suit };
 }
 
 function getAllSelectedCards() {
@@ -1336,56 +1809,68 @@ function cardKey(c) { return c.rank + '_' + c.suit; }
 
 function openPicker(target) {
   pickerTarget = target;
-  pickerRank = null;
-  pickerSuit = null;
-  const used = new Set(getAllSelectedCards().map(cardKey));
-
-  // Reset rank buttons
-  document.querySelectorAll('.rank-btn').forEach(btn => {
-    btn.classList.remove('selected');
-    btn.disabled = false;
-  });
-
-  // Disable suit buttons for used combos
-  document.querySelectorAll('.suit-btn').forEach(btn => {
-    btn.classList.remove('selected');
-    btn.disabled = false;
-  });
-
-  document.getElementById('picker-confirm').disabled = true;
+  const input = document.getElementById('picker-text-input');
+  const preview = document.getElementById('picker-preview');
+  input.value = '';
+  input.className = 'picker-text-input';
+  preview.textContent = '';
+  preview.className = 'picker-preview';
+  const titles = { hole:'Add Pocket Card', flop:'Add Flop Card', turn:'Add Turn Card', river:'Add River Card' };
+  document.getElementById('picker-sheet-title').textContent = titles[target] || 'Add Card';
   document.getElementById('picker-modal').classList.remove('hidden');
+  setTimeout(() => input.focus(), 80);
 }
 
 function closePicker() {
   document.getElementById('picker-modal').classList.add('hidden');
   pickerTarget = null;
-  pickerRank = null;
-  pickerSuit = null;
 }
 
-function selectRank(btn) {
-  document.querySelectorAll('.rank-btn').forEach(b => b.classList.remove('selected'));
-  btn.classList.add('selected');
-  pickerRank = btn.dataset.rank;
-  pickerSuit = null;
-
-  // Disable suits that form used combos
+function onPickerInput(input) {
+  const preview = document.getElementById('picker-preview');
+  const raw = input.value;
+  if (!raw) { preview.textContent = ''; preview.className = 'picker-preview'; return; }
+  const card = parseCardInput(raw);
+  if (!card) {
+    preview.textContent = 'Not a valid card';
+    preview.className = 'picker-preview invalid';
+    return;
+  }
   const used = new Set(getAllSelectedCards().map(cardKey));
-  document.querySelectorAll('.suit-btn').forEach(sb => {
-    sb.classList.remove('selected');
-    const key = pickerRank + '_' + sb.dataset.suit;
-    sb.disabled = used.has(key);
-  });
-
-  document.getElementById('picker-confirm').disabled = true;
+  if (used.has(cardKey(card))) {
+    preview.textContent = `${card.rank}${SUIT_SYM[card.suit]} is already on the table`;
+    preview.className = 'picker-preview taken';
+    return;
+  }
+  preview.textContent = `${card.rank} ${SUIT_SYM[card.suit]} — looks good`;
+  preview.className = 'picker-preview valid';
 }
 
-function selectSuit(btn) {
-  if (btn.disabled) return;
-  document.querySelectorAll('.suit-btn').forEach(b => b.classList.remove('selected'));
-  btn.classList.add('selected');
-  pickerSuit = btn.dataset.suit;
-  document.getElementById('picker-confirm').disabled = !(pickerRank && pickerSuit);
+function onPickerKey(e) {
+  if (e.key === 'Enter') submitPickerInput();
+  if (e.key === 'Escape') closePicker();
+}
+
+function submitPickerInput() {
+  const input = document.getElementById('picker-input') || document.getElementById('picker-text-input');
+  const raw = input.value;
+  const card = parseCardInput(raw);
+  const used = new Set(getAllSelectedCards().map(cardKey));
+
+  if (!card || used.has(cardKey(card))) {
+    input.classList.add('input-error');
+    setTimeout(() => input.classList.remove('input-error'), 400);
+    return;
+  }
+
+  const cards = getStageCards(pickerTarget);
+  const limit = getStageLimit(pickerTarget);
+  if (cards.length >= limit) return;
+
+  cards.push(card);
+  closePicker();
+  renderAll();
+  scheduleCalc();
 }
 
 function getStageLimit(target) {
@@ -1399,16 +1884,6 @@ function getStageCards(target) {
   return community[target];
 }
 
-function confirmPicker() {
-  if (!pickerRank || !pickerSuit) return;
-  const cards = getStageCards(pickerTarget);
-  const limit = getStageLimit(pickerTarget);
-  if (cards.length >= limit) return;
-  cards.push({ rank: pickerRank, suit: pickerSuit });
-  closePicker();
-  renderAll();
-  scheduleCalc();
-}
 
 
 // ═══════════════════════════════════════════════════
@@ -1517,6 +1992,7 @@ function adjustPlayers(delta) {
   const _v2 = document.getElementById('players-val2'); if (_v2) _v2.textContent = numPlayers;
   const v2 = document.getElementById('players-val2');
   if (v2) v2.textContent = numPlayers;
+  updateDashboard();
   scheduleCalc();
 }
 
@@ -1551,6 +2027,7 @@ function resetAll() {
   document.getElementById('delta-loss').className = 'odds-delta';
   document.getElementById('odds-bar').classList.add('hidden');
   renderAll();
+  updateDashboard();
 }
 
 // ═══════════════════════════════════════════════════
@@ -1860,6 +2337,7 @@ function displayOdds(result, label, outs, streetLabel) {
   // Refresh collapsible panels if open
   if (document.getElementById('rankings-body').classList.contains('open')) buildRankingsTable();
   if (document.getElementById('preflop-body').classList.contains('open'))  updatePreflop();
+  updateDashboard();
 }
 
 function drawSparkline() {
@@ -1934,6 +2412,7 @@ function calcPotOdds() {
     resultEl.textContent = `✗ Unprofitable (need ${potOddsPct.toFixed(1)}%, have ${winPct.toFixed(1)}%)`;
     resultEl.className = 'pot-result unprofitable';
   }
+  updateDashboard();
 }
 
 // ═══════════════════════════════════════════════════
@@ -2075,6 +2554,7 @@ function selectPosition(btn) {
   btn.classList.add('selected');
   selectedPosition = btn.dataset.pos;
   updatePosAction();
+  updateDashboard();
 }
 
 function updatePreflop() {
