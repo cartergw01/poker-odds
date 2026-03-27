@@ -679,6 +679,99 @@
   .pos-call  { background: rgba(232,160,32,0.15); color: #f0b830; border: 1px solid rgba(232,160,32,0.35); }
   .pos-fold  { background: rgba(232,51,74,0.15);  color: #ff7085; border: 1px solid rgba(232,51,74,0.35); }
 
+  /* ── FLOATING ODDS BAR ── */
+  .odds-bar {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    z-index: 500;
+    padding: 0 1rem;
+    padding-bottom: env(safe-area-inset-bottom, 0);
+    background: rgba(4,10,6,0.82);
+    backdrop-filter: blur(28px) saturate(180%);
+    -webkit-backdrop-filter: blur(28px) saturate(180%);
+    border-top: 1px solid rgba(255,255,255,0.1);
+    box-shadow: 0 -4px 32px rgba(0,0,0,0.6);
+    transition: transform 0.35s cubic-bezier(.4,0,.2,1), opacity 0.35s;
+  }
+  .odds-bar.hidden {
+    transform: translateY(100%);
+    opacity: 0;
+    pointer-events: none;
+  }
+  .odds-bar-inner {
+    max-width: 860px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 0;
+    gap: 0.5rem;
+  }
+  .odds-bar-block {
+    display: flex; flex-direction: column; align-items: center;
+    flex: 1;
+  }
+  .odds-bar-label {
+    font-size: 0.58rem; letter-spacing: 0.18em;
+    color: var(--muted); margin-bottom: 0.1rem;
+  }
+  .odds-bar-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.9rem; font-weight: 700; line-height: 1;
+  }
+  .odds-bar-num.win-color {
+    background: linear-gradient(160deg,#80ffb8,#1fdb6e,#0aa845);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    filter: drop-shadow(0 0 10px rgba(31,219,110,0.45));
+  }
+  .odds-bar-num.loss-color {
+    background: linear-gradient(160deg,#ff9aaa,#e8334a,#a81a28);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    filter: drop-shadow(0 0 10px rgba(232,51,74,0.4));
+  }
+  .odds-bar-delta {
+    font-size: 0.68rem; font-weight: 700;
+    min-height: 0.9rem; letter-spacing: 0.02em;
+    margin-top: 0.1rem;
+  }
+  .odds-bar-delta.up   { color: #1fdb6e; }
+  .odds-bar-delta.down { color: #e8334a; }
+  .odds-bar-delta.flat { color: var(--muted); }
+  .odds-bar-divider {
+    width: 1px; align-self: stretch;
+    background: rgba(255,255,255,0.08);
+    margin: 0 0.3rem;
+  }
+  .odds-bar-center {
+    flex: 1.2; text-align: center;
+    display: flex; flex-direction: column; align-items: center; gap: 0.2rem;
+  }
+  .odds-bar-street {
+    font-size: 0.6rem; letter-spacing: 0.2em;
+    color: var(--gold); opacity: 0.7;
+    background: rgba(212,168,32,0.12);
+    border: 1px solid rgba(212,168,32,0.25);
+    border-radius: 20px;
+    padding: 0.15rem 0.55rem;
+  }
+  .odds-bar-hand {
+    font-family: 'Playfair Display', serif;
+    font-size: 0.78rem;
+    background: linear-gradient(135deg,#ffe590,#d4a820);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    max-width: 110px; text-align: center;
+  }
+
+  /* Push app content up so bar doesn't overlap bottom */
+  .app { padding-bottom: 7rem; }
+
+  @keyframes barFlash {
+    0%   { opacity: 1; }
+    20%  { opacity: 0.4; }
+    100% { opacity: 1; }
+  }
+  .odds-bar.flash { animation: barFlash 0.4s ease; }
+
   @media (max-width: 480px) {
     header h1 { font-size: 2rem; }
     .odds-card-num { font-size: 1.8rem; }
@@ -882,6 +975,28 @@
 
   <div style="text-align:center;margin-top:3rem;padding-bottom:1rem;font-size:0.58rem;letter-spacing:0.12em;color:rgba(240,232,216,0.2)">
     carter is better than belen
+  </div>
+</div>
+
+<!-- Floating odds bar — always visible -->
+<div id="odds-bar" class="odds-bar hidden">
+  <div class="odds-bar-inner">
+    <div class="odds-bar-block">
+      <div class="odds-bar-label">WIN</div>
+      <div class="odds-bar-num win-color" id="bar-win-pct">—</div>
+      <div class="odds-bar-delta" id="bar-delta-win"></div>
+    </div>
+    <div class="odds-bar-divider"></div>
+    <div class="odds-bar-center">
+      <div class="odds-bar-street" id="bar-street"></div>
+      <div class="odds-bar-hand" id="bar-hand"></div>
+    </div>
+    <div class="odds-bar-divider"></div>
+    <div class="odds-bar-block">
+      <div class="odds-bar-label">LOSS</div>
+      <div class="odds-bar-num loss-color" id="bar-loss-pct">—</div>
+      <div class="odds-bar-delta" id="bar-delta-loss"></div>
+    </div>
   </div>
 </div>
 
@@ -1148,6 +1263,7 @@ function resetAll() {
   document.getElementById('street-badge').className = 'street-badge';
   document.getElementById('delta-win').className = 'odds-delta';
   document.getElementById('delta-loss').className = 'odds-delta';
+  document.getElementById('odds-bar').classList.add('hidden');
   renderAll();
 }
 
@@ -1424,6 +1540,22 @@ function displayOdds(result, label, outs, streetLabel) {
     dLoss.className = 'odds-delta';
   }
   prevWinPct = displayWin;
+
+  // Update floating bar
+  const bar = document.getElementById('odds-bar');
+  document.getElementById('bar-win-pct').textContent  = displayWin.toFixed(1) + '%';
+  document.getElementById('bar-loss-pct').textContent = result.loss.toFixed(1) + '%';
+  document.getElementById('bar-street').textContent   = streetLabel.toUpperCase();
+  document.getElementById('bar-hand').textContent     = label;
+  if (prevWinPct !== null || true) {
+    document.getElementById('bar-delta-win').textContent  = dWin.textContent;
+    document.getElementById('bar-delta-win').className    = dWin.className.replace('odds-delta', 'odds-bar-delta');
+    document.getElementById('bar-delta-loss').textContent = dLoss.textContent;
+    document.getElementById('bar-delta-loss').className   = dLoss.className.replace('odds-delta', 'odds-bar-delta');
+  }
+  bar.classList.remove('hidden', 'flash');
+  void bar.offsetWidth;
+  bar.classList.add('flash');
 
   document.getElementById('hand-label').textContent = label;
   document.getElementById('outs-info').textContent = outs > 0 ? `${outs} out${outs!==1?'s':''} to improve` : '';
