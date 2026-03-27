@@ -808,9 +808,67 @@
     .playing-card { width: 54px; height: 80px; }
     .playing-card .rank { font-size: 1.15rem; }
   }
+
+  /* ── LIGHT MODE ── */
+  body.light {
+    --bg: #f0ece4;
+    --gold-light: #8a5c00;
+    --gold:       #b07800;
+    --gold-dim:   #c89a30;
+    --gold-glow:  rgba(180,130,20,0.25);
+    --emerald:    #d4ead8;
+    --cream:      #2a1f0f;
+    --muted:      rgba(42,31,15,0.55);
+    --glass-bg:   rgba(255,250,240,0.78);
+    --glass-edge: rgba(0,0,0,0.1);
+    --glass-top:  rgba(255,255,255,0.7);
+  }
+  body.light {
+    background-color: #f0ece4;
+    background-image:
+      radial-gradient(ellipse 100% 55% at 50% -5%, rgba(100,160,80,0.2) 0%, transparent 65%),
+      radial-gradient(ellipse 60% 40% at 15% 90%, rgba(140,180,120,0.15) 0%, transparent 60%),
+      repeating-linear-gradient( 45deg, rgba(0,0,0,0.018) 0, rgba(0,0,0,0.018) 1px, transparent 1px, transparent 6px),
+      repeating-linear-gradient(-45deg, rgba(0,0,0,0.018) 0, rgba(0,0,0,0.018) 1px, transparent 1px, transparent 6px);
+  }
+  body.light header h1 {
+    background: linear-gradient(170deg, #c88000 0%, #8a5200 45%, #5c3000 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 2px 14px rgba(180,120,0,0.35));
+  }
+  body.light .playing-card { color: #1a1a1a; background: #fff; border-color: rgba(0,0,0,0.12); }
+  body.light .card-placeholder { background: rgba(0,0,0,0.06); border-color: rgba(0,0,0,0.15); color: rgba(0,0,0,0.25); }
+  body.light .odds-bar { background: rgba(240,235,220,0.95); border-color: rgba(180,130,0,0.35); }
+  body.light .pos-help-panel { background: rgba(0,0,0,0.04); }
+
+  /* ── THEME TOGGLE ── */
+  .theme-toggle {
+    position: absolute; top: 1rem; right: 0;
+    background: none; border: 1px solid rgba(212,168,32,0.3);
+    border-radius: 20px; padding: 0.3rem 0.7rem;
+    display: flex; align-items: center; gap: 0.4rem;
+    cursor: pointer; transition: all 0.2s;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.62rem; letter-spacing: 0.1em;
+    color: var(--gold); opacity: 0.7;
+  }
+  .theme-toggle:hover { opacity: 1; border-color: rgba(212,168,32,0.6); }
+  .theme-toggle .toggle-icon { font-size: 0.85rem; }
+
+  /* ── CHIP RAIN CANVAS ── */
+  #chip-canvas {
+    position: fixed; top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 9999;
+  }
 </style>
 </head>
 <body>
+
+<canvas id="chip-canvas"></canvas>
 
 <!-- Card Picker Modal -->
 <div id="picker-modal" class="modal-overlay hidden">
@@ -833,6 +891,9 @@
 
 <div class="app">
   <header>
+    <button class="theme-toggle" onclick="toggleTheme()" id="theme-toggle-btn">
+      <span class="toggle-icon">☀</span><span id="theme-label">LIGHT</span>
+    </button>
     <div class="header-eyebrow">Texas Hold'em</div>
     <h1>Poker Odds</h1>
     <div class="sub">made by Carter</div>
@@ -1043,6 +1104,140 @@
 </div>
 
 <script>
+// ═══════════════════════════════════════════════════
+//  CHIP RAIN
+// ═══════════════════════════════════════════════════
+(function() {
+  const canvas = document.getElementById('chip-canvas');
+  const ctx = canvas.getContext('2d');
+  let W, H, chips = [], animId;
+
+  const CHIP_COLORS = [
+    { rim: '#e8334a', face: '#c01030', stripe: '#ff6070' }, // red
+    { rim: '#1fdb6e', face: '#0ea850', stripe: '#60f0a0' }, // green
+    { rim: '#d4a820', face: '#a07010', stripe: '#f5d97a' }, // gold
+    { rim: '#4488ff', face: '#2255cc', stripe: '#88aaff' }, // blue
+    { rim: '#cc44cc', face: '#882288', stripe: '#ee88ee' }, // purple
+    { rim: '#e8e8e8', face: '#aaaaaa', stripe: '#ffffff' }, // white
+  ];
+
+  function resize() {
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+
+  function makeChip() {
+    const c = CHIP_COLORS[Math.floor(Math.random() * CHIP_COLORS.length)];
+    return {
+      x: Math.random() * W,
+      y: -60 - Math.random() * 300,
+      r: 14 + Math.random() * 10,
+      vx: (Math.random() - 0.5) * 1.5,
+      vy: 2.5 + Math.random() * 3.5,
+      rot: Math.random() * Math.PI,
+      vrot: (Math.random() - 0.5) * 0.08,
+      tilt: 0.2 + Math.random() * 0.55, // y-scale for 3D tilt
+      color: c,
+      alpha: 1
+    };
+  }
+
+  function drawChip(c) {
+    const { x, y, r, rot, tilt, color, alpha } = c;
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.translate(x, y);
+    ctx.rotate(rot);
+    ctx.scale(1, tilt);
+
+    // shadow
+    ctx.shadowColor = 'rgba(0,0,0,0.45)';
+    ctx.shadowBlur = 10;
+
+    // outer rim
+    ctx.beginPath();
+    ctx.ellipse(0, 0, r, r, 0, 0, Math.PI * 2);
+    ctx.fillStyle = color.rim;
+    ctx.fill();
+
+    // face
+    ctx.beginPath();
+    ctx.ellipse(0, 0, r * 0.78, r * 0.78, 0, 0, Math.PI * 2);
+    ctx.fillStyle = color.face;
+    ctx.fill();
+
+    // stripes (4 notches on rim)
+    ctx.shadowBlur = 0;
+    for (let i = 0; i < 4; i++) {
+      const a = (Math.PI / 2) * i;
+      ctx.save();
+      ctx.rotate(a);
+      ctx.fillStyle = color.stripe;
+      ctx.fillRect(-r * 0.14, -r, r * 0.28, r * 0.22);
+      ctx.restore();
+    }
+
+    // shine
+    const shine = ctx.createRadialGradient(-r*0.25, -r*0.25, r*0.05, 0, 0, r*0.9);
+    shine.addColorStop(0, 'rgba(255,255,255,0.35)');
+    shine.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.beginPath();
+    ctx.ellipse(0, 0, r * 0.78, r * 0.78, 0, 0, Math.PI * 2);
+    ctx.fillStyle = shine;
+    ctx.fill();
+
+    ctx.restore();
+  }
+
+  let spawnCount = 0;
+  const TOTAL_CHIPS = 38;
+
+  function tick() {
+    ctx.clearRect(0, 0, W, H);
+
+    // spawn chips over first ~1.2s
+    if (spawnCount < TOTAL_CHIPS) {
+      if (Math.random() < 0.35) { chips.push(makeChip()); spawnCount++; }
+    }
+
+    let allGone = true;
+    for (const c of chips) {
+      c.x   += c.vx;
+      c.y   += c.vy;
+      c.rot += c.vrot;
+      // fade out once below screen
+      if (c.y - c.r > H) {
+        c.alpha -= 0.06;
+      } else {
+        allGone = false;
+      }
+    }
+    chips = chips.filter(c => c.alpha > 0);
+    chips.forEach(drawChip);
+
+    if (spawnCount < TOTAL_CHIPS || chips.length > 0) {
+      animId = requestAnimationFrame(tick);
+    } else {
+      // done — remove canvas
+      canvas.style.display = 'none';
+    }
+  }
+
+  window.addEventListener('resize', resize);
+  resize();
+  tick();
+})();
+
+// ═══════════════════════════════════════════════════
+//  THEME TOGGLE
+// ═══════════════════════════════════════════════════
+function toggleTheme() {
+  const isLight = document.body.classList.toggle('light');
+  const btn = document.getElementById('theme-toggle-btn');
+  btn.querySelector('.toggle-icon').textContent = isLight ? '🌙' : '☀';
+  btn.querySelector('#theme-label').textContent  = isLight ? 'DARK' : 'LIGHT';
+}
+
 // ═══════════════════════════════════════════════════
 //  STATE
 // ═══════════════════════════════════════════════════
