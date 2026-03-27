@@ -669,6 +669,31 @@
     border-color: rgba(212,168,32,0.6);
     color: var(--gold-light);
   }
+  .pos-help-btn {
+    background: none; border: 1px solid rgba(212,168,32,0.3);
+    color: rgba(212,168,32,0.6); border-radius: 50%;
+    width: 1.2rem; height: 1.2rem; font-size: 0.62rem;
+    cursor: pointer; display: inline-flex; align-items: center; justify-content: center;
+    transition: all 0.15s; flex-shrink: 0; margin-left: 0.4rem; vertical-align: middle;
+  }
+  .pos-help-btn:hover { border-color: var(--gold); color: var(--gold); }
+  .pos-help-panel {
+    display: none; background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(212,168,32,0.2); border-radius: 10px;
+    padding: 0.8rem 1rem; margin-bottom: 0.8rem; margin-top: -0.2rem;
+  }
+  .pos-help-panel.open { display: block; }
+  .pos-help-row {
+    display: flex; align-items: baseline; gap: 0.5rem;
+    padding: 0.3rem 0; border-bottom: 1px solid rgba(255,255,255,0.05);
+    font-size: 0.74rem;
+  }
+  .pos-help-row:last-child { border-bottom: none; }
+  .pos-help-key {
+    font-family: 'IBM Plex Mono', monospace; font-size: 0.68rem;
+    color: var(--gold-light); min-width: 2.6rem; letter-spacing: 0.06em;
+  }
+  .pos-help-val { color: var(--muted); line-height: 1.4; }
   .pos-action {
     display: inline-flex; align-items: center; gap: 0.5rem;
     padding: 0.5rem 1rem; border-radius: 8px;
@@ -821,7 +846,7 @@
 
   <!-- Hole Cards -->
   <div class="section glass">
-    <div class="section-title">Your Hole Cards</div>
+    <div class="section-title">Your Pocket Cards</div>
     <div class="card-row" id="hole-cards-display">
       <div class="card-placeholder">?</div>
       <div class="card-placeholder">?</div>
@@ -843,7 +868,19 @@
         <div class="preflop-label">HAND STRENGTH</div>
         <div id="preflop-tier-result" class="tier-empty">Select your hole cards first</div>
       </div>
-      <div class="preflop-label" style="margin-bottom:0.6rem">YOUR POSITION</div>
+      <div style="display:flex;align-items:center;margin-bottom:0.6rem">
+        <div class="preflop-label" style="margin-bottom:0">YOUR POSITION</div>
+        <button class="pos-help-btn" onclick="togglePosHelp()" title="What do these mean?">?</button>
+      </div>
+      <div class="pos-help-panel" id="pos-help-panel">
+        <div class="pos-help-row"><span class="pos-help-key">UTG</span><span class="pos-help-val">Under the Gun — first to act preflop. Tightest position, play only strong hands.</span></div>
+        <div class="pos-help-row"><span class="pos-help-key">MP</span><span class="pos-help-val">Middle Position — still early, but slightly more range than UTG.</span></div>
+        <div class="pos-help-row"><span class="pos-help-key">HJ</span><span class="pos-help-val">Hijack — two seats right of the button. Can start opening wider.</span></div>
+        <div class="pos-help-row"><span class="pos-help-key">CO</span><span class="pos-help-val">Cutoff — one seat right of the button. Strong position, open fairly wide.</span></div>
+        <div class="pos-help-row"><span class="pos-help-key">BTN</span><span class="pos-help-val">Button — best seat at the table. Acts last on every postflop street. Play wide.</span></div>
+        <div class="pos-help-row"><span class="pos-help-key">SB</span><span class="pos-help-val">Small Blind — posts half a big blind, acts first postflop. Tricky spot.</span></div>
+        <div class="pos-help-row"><span class="pos-help-key">BB</span><span class="pos-help-val">Big Blind — already invested 1 BB, gets to defend wide vs raises.</span></div>
+      </div>
       <div class="position-row" id="position-row">
         <button class="pos-btn" data-pos="UTG"  onclick="selectPosition(this)">UTG</button>
         <button class="pos-btn" data-pos="MP"   onclick="selectPosition(this)">MP</button>
@@ -1782,6 +1819,11 @@ function getHandTier(canonical) {
   if (TIER_PLAYABLE.has(canonical)) return 'playable';
   if (TIER_MARGINAL.has(canonical)) return 'marginal';
   return 'fold';
+}
+
+function togglePosHelp() {
+  const panel = document.getElementById('pos-help-panel');
+  panel.classList.toggle('open');
 }
 
 function selectPosition(btn) {
