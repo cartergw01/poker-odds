@@ -407,50 +407,60 @@
   /* ── ODDS DISPLAY ── */
   .odds-section { text-align: center; }
 
-  .win-pct {
-    font-family: 'Playfair Display', serif;
-    font-size: 6rem;
-    line-height: 1;
-    display: block;
-    background: linear-gradient(160deg, #80ffb8 0%, #1fdb6e 45%, #0aa845 100%);
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-    filter: drop-shadow(0 0 28px rgba(31,219,110,0.55));
-    transition: filter 0.4s, background 0.4s;
-  }
-  .win-pct.caution {
-    background: linear-gradient(160deg, #ffe590 0%, #e8a020 45%, #b87010 100%);
-    filter: drop-shadow(0 0 28px rgba(232,160,32,0.55));
-  }
-  .win-pct.danger {
-    background: linear-gradient(160deg, #ff9aaa 0%, #e8334a 45%, #a81a28 100%);
-    filter: drop-shadow(0 0 28px rgba(232,51,74,0.55));
-  }
 
-  .win-label {
-    font-size: 0.62rem; letter-spacing: 0.28em;
-    color: var(--muted); margin-top: 0.3rem; margin-bottom: 1.5rem;
-    text-transform: uppercase;
+  /* ── ODDS CARDS ── */
+  .odds-cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 0.7rem;
   }
-
-  /* Arc / bar */
-  .bars-row {
-    display: flex; height: 48px; border-radius: 12px; overflow: hidden;
-    background: rgba(0,0,0,0.5);
-    box-shadow: inset 0 2px 8px rgba(0,0,0,0.6), 0 0 0 1px rgba(0,0,0,0.3);
-    margin-bottom: 1.5rem;
+  .odds-card {
+    border-radius: 14px;
+    padding: 1rem 0.5rem;
+    text-align: center;
+    display: flex; flex-direction: column; align-items: center; gap: 0.3rem;
   }
-  .bar-win  { background: linear-gradient(90deg,#1fdb6e,#0aa845); transition: width 0.7s cubic-bezier(.4,0,.2,1); display:flex; align-items:center; justify-content:center; overflow:hidden; min-width:0; }
-  .bar-tie  { background: linear-gradient(90deg,#e8a020,#c07010); transition: width 0.7s cubic-bezier(.4,0,.2,1); display:flex; align-items:center; justify-content:center; overflow:hidden; min-width:0; }
-  .bar-loss { background: linear-gradient(90deg,#e8334a,#a81a28); transition: width 0.7s cubic-bezier(.4,0,.2,1); display:flex; align-items:center; justify-content:center; overflow:hidden; min-width:0; }
-  .bar-label {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.7rem;
+  .odds-card-label {
+    font-size: 0.58rem;
+    letter-spacing: 0.2em;
     font-weight: 600;
-    color: rgba(0,0,0,0.75);
-    white-space: nowrap;
-    letter-spacing: 0.03em;
-    pointer-events: none;
-    transition: opacity 0.3s;
+    opacity: 0.7;
+  }
+  .odds-card-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.2rem;
+    line-height: 1;
+    font-weight: 700;
+  }
+  .odds-card-win {
+    background: rgba(31,219,110,0.1);
+    border: 1px solid rgba(31,219,110,0.25);
+  }
+  .odds-card-win .odds-card-label { color: #1fdb6e; }
+  .odds-card-win .odds-card-num   {
+    background: linear-gradient(160deg,#80ffb8,#1fdb6e,#0aa845);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    filter: drop-shadow(0 0 12px rgba(31,219,110,0.4));
+  }
+  .odds-card-tie {
+    background: rgba(232,160,32,0.08);
+    border: 1px solid rgba(232,160,32,0.2);
+  }
+  .odds-card-tie .odds-card-label { color: #e8a020; }
+  .odds-card-tie .odds-card-num   {
+    background: linear-gradient(160deg,#ffe590,#e8a020,#c07010);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    filter: drop-shadow(0 0 10px rgba(232,160,32,0.3));
+  }
+  .odds-card-loss {
+    background: rgba(232,51,74,0.08);
+    border: 1px solid rgba(232,51,74,0.2);
+  }
+  .odds-card-loss .odds-card-label { color: #e8334a; }
+  .odds-card-loss .odds-card-num   {
+    background: linear-gradient(160deg,#ff9aaa,#e8334a,#a81a28);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    filter: drop-shadow(0 0 10px rgba(232,51,74,0.3));
   }
 
   .hand-label {
@@ -634,7 +644,7 @@
 
   @media (max-width: 480px) {
     header h1 { font-size: 2rem; }
-    .win-pct  { font-size: 4.5rem; }
+    .odds-card-num { font-size: 1.8rem; }
     .playing-card { width: 54px; height: 80px; }
     .playing-card .rank { font-size: 1.15rem; }
   }
@@ -729,17 +739,24 @@
   </div>
 
   <!-- Odds Display -->
-  <div class="section odds-section" id="odds-section" style="display:none">
-    <div class="section-title">Win Probability</div>
+  <div class="section glass odds-section" id="odds-section" style="display:none">
+    <div class="section-title">Odds</div>
     <div id="odds-content">
-      <div class="win-pct" id="win-pct">—</div>
-      <div class="win-label">WIN PROBABILITY</div>
-      <div class="bars-row">
-        <div class="bar-win" id="bar-win" style="width:0%"><span class="bar-label" id="label-win"></span></div>
-        <div class="bar-tie" id="bar-tie" style="width:0%"><span class="bar-label" id="label-tie"></span></div>
-        <div class="bar-loss" id="bar-loss" style="width:100%"><span class="bar-label" id="label-loss">Loss 100%</span></div>
+      <div class="odds-cards">
+        <div class="odds-card odds-card-win">
+          <div class="odds-card-label">WIN</div>
+          <div class="odds-card-num" id="win-pct">—</div>
+        </div>
+        <div class="odds-card odds-card-tie">
+          <div class="odds-card-label">TIE</div>
+          <div class="odds-card-num" id="tie-pct">—</div>
+        </div>
+        <div class="odds-card odds-card-loss">
+          <div class="odds-card-label">LOSS</div>
+          <div class="odds-card-num" id="loss-pct">—</div>
+        </div>
       </div>
-      <div class="hand-label" id="hand-label">—</div>
+      <div class="hand-label" id="hand-label" style="margin-top:1.2rem">—</div>
       <div class="outs-info" id="outs-info"></div>
       <div id="sparkline-wrap" style="margin-top:1.4rem;display:none">
         <svg id="sparkline-svg" width="100%" height="90" style="overflow:visible;display:block"></svg>
@@ -1303,18 +1320,9 @@ function scheduleCalc() {
 function displayOdds(result, label, outs, streetLabel) {
   document.getElementById('calculating-msg').classList.add('hidden');
 
-  const winEl = document.getElementById('win-pct');
-  winEl.textContent = result.win.toFixed(1) + '%';
-  winEl.className = 'win-pct' + (result.win < 30 ? ' danger' : result.win < 50 ? ' caution' : '');
-
-  document.getElementById('bar-win').style.width  = result.win  + '%';
-  document.getElementById('bar-tie').style.width  = result.tie  + '%';
-  document.getElementById('bar-loss').style.width = result.loss + '%';
-
-  const fmt = (name, pct) => pct >= 8 ? `${name} ${pct.toFixed(1)}%` : pct >= 4 ? `${pct.toFixed(0)}%` : '';
-  document.getElementById('label-win').textContent  = fmt('Win',  result.win);
-  document.getElementById('label-tie').textContent  = fmt('Tie',  result.tie);
-  document.getElementById('label-loss').textContent = fmt('Loss', result.loss);
+  document.getElementById('win-pct').textContent  = result.win.toFixed(1)  + '%';
+  document.getElementById('tie-pct').textContent  = result.tie.toFixed(1)  + '%';
+  document.getElementById('loss-pct').textContent = result.loss.toFixed(1) + '%';
 
   document.getElementById('hand-label').textContent = label;
   document.getElementById('outs-info').textContent = outs > 0 ? `${outs} out${outs!==1?'s':''} to improve` : '';
