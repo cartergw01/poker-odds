@@ -345,22 +345,6 @@
   .suit-btn.hearts.selected, .suit-btn.diamonds.selected { color: #1a0000; }
   .picker-actions { display: flex; gap: 0.6rem; justify-content: flex-end; margin-top: 0.4rem; }
 
-  /* Camera modal */
-  #camera-modal {
-    position: fixed; inset: 0; z-index: 998;
-    background: rgba(0,0,0,0.92);
-    display: flex; align-items: center; justify-content: center;
-    flex-direction: column; gap: 1.1rem;
-  }
-  #camera-modal.hidden { display: none; }
-  #camera-video {
-    max-width: 100%; width: 340px;
-    border-radius: 14px;
-    border: 1.5px solid rgba(212,168,32,0.4);
-    box-shadow: 0 0 0 1px rgba(0,0,0,0.6), 0 8px 40px rgba(0,0,0,0.7);
-  }
-  #camera-canvas { display: none; }
-  .camera-actions { display: flex; gap: 0.8rem; }
 
   /* ── PLAYERS ── */
   .players-row { display: flex; align-items: center; gap: 1.2rem; flex-wrap: wrap; }
@@ -505,19 +489,6 @@
 </head>
 <body>
 
-<!-- API Key Modal -->
-<div id="api-modal" class="modal-overlay">
-  <div class="modal-box glass">
-    <h2>Anthropic API Key</h2>
-    <p>Enter your Anthropic API key to enable card scanning via Claude Vision. It will be stored in localStorage on this device only.</p>
-    <input type="password" id="api-key-input" placeholder="sk-ant-..." autocomplete="off">
-    <div style="display:flex;gap:0.6rem">
-      <button class="btn primary" onclick="saveApiKey()">Save Key</button>
-      <button class="btn" onclick="skipApiKey()">Skip (Manual Only)</button>
-    </div>
-  </div>
-</div>
-
 <!-- Card Picker Modal -->
 <div id="picker-modal" class="modal-overlay hidden">
   <div class="picker-box glass">
@@ -536,16 +507,6 @@
   </div>
 </div>
 
-<!-- Camera Modal -->
-<div id="camera-modal" class="hidden">
-  <video id="camera-video" autoplay playsinline></video>
-  <canvas id="camera-canvas"></canvas>
-  <div class="camera-actions">
-    <button class="btn primary" onclick="capturePhoto()">📷 Capture</button>
-    <button class="btn danger" onclick="closeCamera()">Cancel</button>
-  </div>
-  <div id="camera-status" class="scan-status" style="color:var(--cream-dim);text-align:center"></div>
-</div>
 
 <div class="app">
   <header>
@@ -562,11 +523,9 @@
       <div class="card-placeholder">?</div>
     </div>
     <div style="margin-top:0.8rem" class="flex-gap">
-      <button class="btn primary" onclick="openCamera('hole')" id="scan-hole-btn">📷 Scan Cards</button>
-      <button class="btn" onclick="openPicker('hole')">＋ Pick Card</button>
+      <button class="btn primary" onclick="openPicker('hole')">＋ Pick Card</button>
       <button class="btn danger" onclick="resetHole()">↺ Reset</button>
     </div>
-    <div class="scan-status" id="hole-scan-status"></div>
   </div>
 
   <!-- Players -->
@@ -594,8 +553,7 @@
         <div class="card-placeholder">?</div>
       </div>
       <div class="stage-actions">
-        <button class="btn primary" onclick="openCamera('flop')" id="scan-flop-btn">📷</button>
-        <button class="btn" onclick="openPicker('flop')">＋</button>
+        <button class="btn primary" onclick="openPicker('flop')">＋</button>
         <button class="btn danger" onclick="resetStage('flop')">↺</button>
       </div>
     </div>
@@ -606,8 +564,7 @@
         <div class="card-placeholder">?</div>
       </div>
       <div class="stage-actions">
-        <button class="btn primary" onclick="openCamera('turn')" id="scan-turn-btn">📷</button>
-        <button class="btn" onclick="openPicker('turn')">＋</button>
+        <button class="btn primary" onclick="openPicker('turn')">＋</button>
         <button class="btn danger" onclick="resetStage('turn')">↺</button>
       </div>
     </div>
@@ -618,8 +575,7 @@
         <div class="card-placeholder">?</div>
       </div>
       <div class="stage-actions">
-        <button class="btn primary" onclick="openCamera('river')" id="scan-river-btn">📷</button>
-        <button class="btn" onclick="openPicker('river')">＋</button>
+        <button class="btn primary" onclick="openPicker('river')">＋</button>
         <button class="btn danger" onclick="resetStage('river')">↺</button>
       </div>
     </div>
@@ -643,6 +599,9 @@
       </div>
       <div class="hand-label" id="hand-label">—</div>
       <div class="outs-info" id="outs-info"></div>
+      <div id="sparkline-wrap" style="margin-top:1.4rem;display:none">
+        <svg id="sparkline-svg" width="100%" height="90" style="overflow:visible;display:block"></svg>
+      </div>
     </div>
     <div class="calculating hidden" id="calculating-msg">Calculating odds...</div>
   </div>
@@ -664,8 +623,7 @@
   </div>
 
   <div style="text-align:center;margin-top:1.5rem">
-    <button class="btn ghost" onclick="showApiKeyModal()">⚙ API Key</button>
-    <button class="btn danger" onclick="resetAll()" style="margin-left:0.5rem">Reset All</button>
+    <button class="btn danger" onclick="resetAll()">Reset All</button>
   </div>
 
   <div style="text-align:center;margin-top:3rem;padding-bottom:1rem;font-size:0.58rem;letter-spacing:0.12em;color:rgba(240,232,216,0.2)">
@@ -677,16 +635,14 @@
 // ═══════════════════════════════════════════════════
 //  STATE
 // ═══════════════════════════════════════════════════
-let apiKey = localStorage.getItem('anthropic_api_key') || '';
 let holeCards = [];
 let community = { flop: [], turn: [], river: [] };
 let numPlayers = 4;
 let pickerTarget = null;
 let pickerRank = null;
 let pickerSuit = null;
-let cameraTarget = null;
-let cameraStream = null;
 let calcTimeout = null;
+let equityHistory = []; // [{label, pct}]
 
 const RANKS = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
 const SUITS = ['spades','hearts','diamonds','clubs'];
@@ -697,29 +653,9 @@ const RED_SUITS = new Set(['hearts','diamonds']);
 //  INIT
 // ═══════════════════════════════════════════════════
 window.addEventListener('load', () => {
-  if (!apiKey) {
-    document.getElementById('api-modal').classList.remove('hidden');
-  }
   buildRankButtons();
   renderAll();
 });
-
-function saveApiKey() {
-  const val = document.getElementById('api-key-input').value.trim();
-  if (!val) return;
-  apiKey = val;
-  localStorage.setItem('anthropic_api_key', apiKey);
-  document.getElementById('api-modal').classList.add('hidden');
-}
-
-function skipApiKey() {
-  document.getElementById('api-modal').classList.add('hidden');
-}
-
-function showApiKeyModal() {
-  document.getElementById('api-key-input').value = apiKey;
-  document.getElementById('api-modal').classList.remove('hidden');
-}
 
 // ═══════════════════════════════════════════════════
 //  CARD PICKER
@@ -818,103 +754,6 @@ function confirmPicker() {
   scheduleCalc();
 }
 
-// ═══════════════════════════════════════════════════
-//  CAMERA & SCAN
-// ═══════════════════════════════════════════════════
-async function openCamera(target) {
-  if (!apiKey) {
-    alert('Please set your Anthropic API key first.');
-    showApiKeyModal();
-    return;
-  }
-  cameraTarget = target;
-  document.getElementById('camera-modal').classList.remove('hidden');
-  document.getElementById('camera-status').textContent = 'Starting camera...';
-  try {
-    cameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false });
-    document.getElementById('camera-video').srcObject = cameraStream;
-    document.getElementById('camera-status').textContent = 'Point camera at cards, then tap Capture.';
-  } catch(e) {
-    document.getElementById('camera-status').textContent = 'Camera error: ' + e.message;
-  }
-}
-
-function closeCamera() {
-  if (cameraStream) { cameraStream.getTracks().forEach(t => t.stop()); cameraStream = null; }
-  document.getElementById('camera-modal').classList.add('hidden');
-  cameraTarget = null;
-}
-
-async function capturePhoto() {
-  const video = document.getElementById('camera-video');
-  const canvas = document.getElementById('camera-canvas');
-  canvas.width = video.videoWidth;
-  canvas.height = video.videoHeight;
-  canvas.getContext('2d').drawImage(video, 0, 0);
-  const b64 = canvas.toDataURL('image/jpeg', 0.85).split(',')[1];
-  document.getElementById('camera-status').textContent = 'Analyzing cards...';
-
-  const target = cameraTarget;
-  closeCamera();
-
-  const statusEl = target === 'hole'
-    ? document.getElementById('hole-scan-status')
-    : null;
-
-  if (statusEl) { statusEl.textContent = 'Scanning...'; statusEl.className = 'scan-status'; }
-
-  try {
-    const detected = await detectCards(b64);
-    const cards = getStageCards(target);
-    const limit = getStageLimit(target);
-    const used = new Set(getAllSelectedCards().map(cardKey));
-    let added = 0;
-    for (const c of detected) {
-      if (cards.length >= limit) break;
-      if (!RANKS.includes(c.rank) || !SUITS.includes(c.suit)) continue;
-      if (used.has(cardKey(c))) continue;
-      cards.push(c);
-      used.add(cardKey(c));
-      added++;
-    }
-    if (statusEl) {
-      statusEl.textContent = added > 0 ? `Detected ${added} card(s).` : 'No new cards detected.';
-      statusEl.className = 'scan-status ' + (added > 0 ? 'success' : 'error');
-    }
-    renderAll();
-    scheduleCalc();
-  } catch(e) {
-    if (statusEl) { statusEl.textContent = 'Detection failed: ' + e.message; statusEl.className = 'scan-status error'; }
-  }
-}
-
-async function detectCards(b64) {
-  const resp = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': apiKey,
-      'anthropic-version': '2023-06-01',
-      'anthropic-dangerous-direct-browser-access': 'true'
-    },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 256,
-      system: 'You are a playing card detector. The user will show you cards. Return ONLY a valid JSON array, no other text, no markdown, no explanation. Format: [{"rank": "A", "suit": "spades"}]. Ranks: A, 2–10, J, Q, K. Suits: spades, hearts, diamonds, clubs.',
-      messages: [{
-        role: 'user',
-        content: [{ type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: b64 } },
-                  { type: 'text', text: 'What cards are in this image?' }]
-      }]
-    })
-  });
-  if (!resp.ok) throw new Error('API error ' + resp.status);
-  const data = await resp.json();
-  const text = data.content[0].text.trim();
-  const arr = JSON.parse(text);
-  if (!Array.isArray(arr)) throw new Error('Unexpected response');
-  return arr;
-}
 
 // ═══════════════════════════════════════════════════
 //  RENDER
@@ -1027,13 +866,17 @@ function adjustPlayers(delta) {
 
 function resetHole() {
   holeCards = [];
-  document.getElementById('hole-scan-status').textContent = '';
+  equityHistory = [];
   renderAll();
   scheduleCalc();
 }
 
 function resetStage(stage) {
   community[stage] = [];
+  // Trim history back to what's still valid
+  const stageOrder = ['hole','flop','turn','river'];
+  const stageIdx = stageOrder.indexOf(stage);
+  equityHistory = equityHistory.filter((_,i) => i < stageIdx);
   renderAll();
   scheduleCalc();
 }
@@ -1041,9 +884,10 @@ function resetStage(stage) {
 function resetAll() {
   holeCards = [];
   community = { flop: [], turn: [], river: [] };
-  document.getElementById('hole-scan-status').textContent = '';
+  equityHistory = [];
   document.getElementById('odds-section').style.display = 'none';
   document.getElementById('pot-odds-section').style.display = 'none';
+  document.getElementById('sparkline-wrap').style.display = 'none';
   renderAll();
 }
 
@@ -1255,6 +1099,13 @@ function countOuts(hole, board) {
   return outs;
 }
 
+function currentStreetLabel() {
+  if (community.river.length === 1) return 'River';
+  if (community.turn.length === 1)  return 'Turn';
+  if (community.flop.length === 3)  return 'Flop';
+  return 'Pre';
+}
+
 function scheduleCalc() {
   if (holeCards.length < 2) {
     document.getElementById('odds-section').style.display = 'none';
@@ -1271,11 +1122,11 @@ function scheduleCalc() {
     const result = monteCarlo(holeCards, board, numPlayers);
     const label = getHandLabel(holeCards, board);
     const outs = countOuts(holeCards, board);
-    displayOdds(result, label, outs);
+    displayOdds(result, label, outs, currentStreetLabel());
   }, 50);
 }
 
-function displayOdds(result, label, outs) {
+function displayOdds(result, label, outs, streetLabel) {
   document.getElementById('calculating-msg').classList.add('hidden');
 
   const winEl = document.getElementById('win-pct');
@@ -1293,12 +1144,72 @@ function displayOdds(result, label, outs) {
   document.getElementById('hand-label').textContent = label;
   document.getElementById('outs-info').textContent = outs > 0 ? `${outs} out${outs!==1?'s':''} to improve` : '';
 
+  // Update equity history — upsert by street label
+  const pct = parseFloat(result.win.toFixed(1));
+  const existing = equityHistory.findIndex(e => e.label === streetLabel);
+  if (existing >= 0) equityHistory[existing].pct = pct;
+  else equityHistory.push({ label: streetLabel, pct });
+  drawSparkline();
+
   const content = document.getElementById('odds-content');
   content.classList.remove('stats-animate');
   void content.offsetWidth;
   content.classList.add('stats-animate');
 
   calcPotOdds();
+}
+
+function drawSparkline() {
+  const wrap = document.getElementById('sparkline-wrap');
+  const svg = document.getElementById('sparkline-svg');
+  if (equityHistory.length < 1) { wrap.style.display = 'none'; return; }
+  wrap.style.display = 'block';
+
+  const W = svg.parentElement.offsetWidth || 300;
+  const H = 60; // usable chart area height (labels go below)
+  svg.setAttribute('viewBox', `0 0 ${W} 90`);
+
+  const n = equityHistory.length;
+  const padX = 24, padY = 8;
+  const chartW = W - padX * 2;
+  const chartH = H - padY * 2;
+
+  // Map pct (0–100) to y coordinate
+  const toX = i => padX + (n === 1 ? chartW / 2 : (i / (n - 1)) * chartW);
+  const toY = p => padY + chartH - (p / 100) * chartH;
+
+  let html = '';
+
+  // Lines between points
+  for (let i = 1; i < n; i++) {
+    const x1 = toX(i-1), y1 = toY(equityHistory[i-1].pct);
+    const x2 = toX(i),   y2 = toY(equityHistory[i].pct);
+    const up = equityHistory[i].pct >= equityHistory[i-1].pct;
+    html += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"
+      stroke="${up ? '#1fdb6e' : '#e8334a'}" stroke-width="2"
+      stroke-linecap="round" opacity="0.85"/>`;
+  }
+
+  // Dots + labels
+  for (let i = 0; i < n; i++) {
+    const x = toX(i), y = toY(equityHistory[i].pct);
+    const pct = equityHistory[i].pct;
+    const lbl = equityHistory[i].label;
+    // Dot glow
+    html += `<circle cx="${x}" cy="${y}" r="6" fill="rgba(0,0,0,0.4)"/>`;
+    html += `<circle cx="${x}" cy="${y}" r="4" fill="#d4a820" stroke="rgba(245,217,122,0.6)" stroke-width="1.5"/>`;
+    // Street label
+    html += `<text x="${x}" y="${H + 16}" text-anchor="middle"
+      font-family="IBM Plex Mono,monospace" font-size="9"
+      fill="rgba(240,232,216,0.45)" letter-spacing="0.08em">${lbl.toUpperCase()}</text>`;
+    // Pct label — above dot if going up, below if going down
+    const lblY = (i > 0 && equityHistory[i].pct < equityHistory[i-1].pct) ? y + 16 : y - 10;
+    html += `<text x="${x}" y="${lblY}" text-anchor="middle"
+      font-family="IBM Plex Mono,monospace" font-size="10" font-weight="600"
+      fill="rgba(240,232,216,0.75)">${pct}%</text>`;
+  }
+
+  svg.innerHTML = html;
 }
 
 function calcPotOdds() {
