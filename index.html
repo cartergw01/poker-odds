@@ -411,9 +411,18 @@
   /* ── ODDS CARDS ── */
   .odds-cards {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr;
     gap: 0.7rem;
   }
+  .players-inline {
+    display: flex; align-items: center; gap: 0.5rem;
+    margin-top: 0.9rem;
+    flex-wrap: wrap;
+  }
+  .players-inline-label { font-size: 0.68rem; color: var(--muted); letter-spacing: 0.06em; }
+  .players-inline-hint  { font-size: 0.6rem;  color: var(--muted); opacity: 0.5; font-style: italic; }
+  .players-inline .stepper-btn { width: 28px; height: 28px; font-size: 1rem; }
+  .players-inline .stepper-val { font-size: 1.1rem; min-width: 20px; }
   .odds-card {
     border-radius: 14px;
     padding: 1rem 0.5rem;
@@ -441,16 +450,6 @@
     background: linear-gradient(160deg,#80ffb8,#1fdb6e,#0aa845);
     -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
     filter: drop-shadow(0 0 12px rgba(31,219,110,0.4));
-  }
-  .odds-card-tie {
-    background: rgba(232,160,32,0.08);
-    border: 1px solid rgba(232,160,32,0.2);
-  }
-  .odds-card-tie .odds-card-label { color: #e8a020; }
-  .odds-card-tie .odds-card-num   {
-    background: linear-gradient(160deg,#ffe590,#e8a020,#c07010);
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-    filter: drop-shadow(0 0 10px rgba(232,160,32,0.3));
   }
   .odds-card-loss {
     background: rgba(232,51,74,0.08);
@@ -747,14 +746,17 @@
           <div class="odds-card-label">WIN</div>
           <div class="odds-card-num" id="win-pct">—</div>
         </div>
-        <div class="odds-card odds-card-tie">
-          <div class="odds-card-label">TIE</div>
-          <div class="odds-card-num" id="tie-pct">—</div>
-        </div>
         <div class="odds-card odds-card-loss">
           <div class="odds-card-label">LOSS</div>
           <div class="odds-card-num" id="loss-pct">—</div>
         </div>
+      </div>
+      <div class="players-inline">
+        <span class="players-inline-label">Active players</span>
+        <button class="stepper-btn" onclick="adjustPlayers(-1)">−</button>
+        <span class="stepper-val" id="players-val2">4</span>
+        <button class="stepper-btn" onclick="adjustPlayers(1)">＋</button>
+        <span class="players-inline-hint">(update as players fold)</span>
       </div>
       <div class="hand-label" id="hand-label" style="margin-top:1.2rem">—</div>
       <div class="outs-info" id="outs-info"></div>
@@ -814,6 +816,21 @@
         <button class="pos-btn" data-pos="BB"   onclick="selectPosition(this)">BB</button>
       </div>
       <div id="position-action" class="pos-action-empty">Select a position</div>
+
+      <div style="margin-top:1.2rem">
+        <div class="preflop-label" style="margin-bottom:0.5rem">YOUR RAISE SIZE</div>
+        <div style="display:flex;align-items:center;gap:0.6rem;flex-wrap:wrap">
+          <div class="input-group">
+            <label>BIG BLINDS</label>
+            <input type="number" id="raise-size-bb" placeholder="2.5" min="1" step="0.5" oninput="updateRaiseDisplay()">
+          </div>
+          <div class="input-group">
+            <label>BB SIZE ($)</label>
+            <input type="number" id="bb-dollar" placeholder="2" min="0.01" step="0.5" oninput="updateRaiseDisplay()">
+          </div>
+          <div id="raise-dollar-result" class="pot-result neutral" style="margin-top:1rem">Enter amounts</div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -1044,6 +1061,7 @@ function renderAll() {
   });
 
   document.getElementById('players-val').textContent = numPlayers;
+  const _v2 = document.getElementById('players-val2'); if (_v2) _v2.textContent = numPlayers;
 }
 
 // ═══════════════════════════════════════════════════
@@ -1052,6 +1070,9 @@ function renderAll() {
 function adjustPlayers(delta) {
   numPlayers = Math.max(2, Math.min(8, numPlayers + delta));
   document.getElementById('players-val').textContent = numPlayers;
+  const _v2 = document.getElementById('players-val2'); if (_v2) _v2.textContent = numPlayers;
+  const v2 = document.getElementById('players-val2');
+  if (v2) v2.textContent = numPlayers;
   scheduleCalc();
 }
 
@@ -1320,15 +1341,16 @@ function scheduleCalc() {
 function displayOdds(result, label, outs, streetLabel) {
   document.getElementById('calculating-msg').classList.add('hidden');
 
-  document.getElementById('win-pct').textContent  = result.win.toFixed(1)  + '%';
-  document.getElementById('tie-pct').textContent  = result.tie.toFixed(1)  + '%';
+  // Splits (chops) go to the player, so fold into win display
+  const displayWin = result.win + result.tie;
+  document.getElementById('win-pct').textContent  = displayWin.toFixed(1)  + '%';
   document.getElementById('loss-pct').textContent = result.loss.toFixed(1) + '%';
 
   document.getElementById('hand-label').textContent = label;
   document.getElementById('outs-info').textContent = outs > 0 ? `${outs} out${outs!==1?'s':''} to improve` : '';
 
   // Update equity history — upsert by street label
-  const pct = parseFloat(result.win.toFixed(1));
+  const pct = parseFloat(displayWin.toFixed(1));
   const existing = equityHistory.findIndex(e => e.label === streetLabel);
   if (existing >= 0) equityHistory[existing].pct = pct;
   else equityHistory.push({ label: streetLabel, pct });
@@ -1417,6 +1439,24 @@ function calcPotOdds() {
     resultEl.textContent = `✗ Unprofitable (need ${potOddsPct.toFixed(1)}%, have ${winPct.toFixed(1)}%)`;
     resultEl.className = 'pot-result unprofitable';
   }
+}
+
+// ═══════════════════════════════════════════════════
+//  RAISE SIZE CALCULATOR
+// ═══════════════════════════════════════════════════
+function updateRaiseDisplay() {
+  const bb   = parseFloat(document.getElementById('raise-size-bb').value);
+  const bbDollar = parseFloat(document.getElementById('bb-dollar').value);
+  const el   = document.getElementById('raise-dollar-result');
+  if (!bb || bb <= 0) { el.textContent = 'Enter amounts'; el.className = 'pot-result neutral'; return; }
+  if (!bbDollar || bbDollar <= 0) {
+    el.textContent = `${bb}BB raise`;
+    el.className = 'pot-result neutral';
+    return;
+  }
+  const total = (bb * bbDollar).toFixed(2);
+  el.textContent = `$${total} raise`;
+  el.className = 'pot-result profitable';
 }
 
 // ═══════════════════════════════════════════════════
