@@ -10,14 +10,14 @@
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    --bg: #030806;
+    --bg: #0a1f12;
     --gold-light: #f5d97a;
     --gold:       #d4a820;
     --gold-dim:   #8a6510;
     --gold-glow:  rgba(212,168,32,0.35);
     --emerald:    #0d2a1a;
     --cream:      #f0e8d8;
-    --muted:      rgba(240,232,216,0.45);
+    --muted:      rgba(240,232,216,0.55);
     --red:        #d42b3a;
     --black:      #0a0a0a;
     --win:        #1fdb6e;
@@ -25,9 +25,9 @@
     --loss:       #e8334a;
     --loss-glow:  rgba(232,51,74,0.4);
     --tie:        #e8a020;
-    --glass-bg:   rgba(6,18,10,0.72);
-    --glass-edge: rgba(255,255,255,0.09);
-    --glass-top:  rgba(255,255,255,0.16);
+    --glass-bg:   rgba(8,28,16,0.68);
+    --glass-edge: rgba(255,255,255,0.11);
+    --glass-top:  rgba(255,255,255,0.2);
   }
 
   /* ── BASE ── */
@@ -37,18 +37,15 @@
     font-family: 'IBM Plex Mono', monospace;
     min-height: 100vh;
     overflow-x: hidden;
-    /* Deep casino lighting: overhead spot + ambient */
+    /* Casino overhead spotlight — brighter, more alive */
     background-image:
-      radial-gradient(ellipse 100% 55% at 50% -5%,  rgba(18,90,45,0.55) 0%, transparent 65%),
-      radial-gradient(ellipse 60%  40% at 15% 90%,  rgba(8,40,20,0.4)   0%, transparent 60%),
-      radial-gradient(ellipse 50%  35% at 90% 85%,  rgba(8,40,20,0.35)  0%, transparent 55%);
-    /* Felt weave — tight diagonal crosshatch */
-    background-image:
-      radial-gradient(ellipse 100% 55% at 50% -5%,  rgba(18,90,45,0.55) 0%, transparent 65%),
-      radial-gradient(ellipse 60%  40% at 15% 90%,  rgba(8,40,20,0.4)   0%, transparent 60%),
-      radial-gradient(ellipse 50%  35% at 90% 85%,  rgba(8,40,20,0.35)  0%, transparent 55%),
-      repeating-linear-gradient( 45deg, rgba(255,255,255,0.022) 0, rgba(255,255,255,0.022) 1px, transparent 1px, transparent 6px),
-      repeating-linear-gradient(-45deg, rgba(255,255,255,0.022) 0, rgba(255,255,255,0.022) 1px, transparent 1px, transparent 6px);
+      radial-gradient(ellipse 110% 60% at 50% -5%,  rgba(22,110,55,0.75) 0%, transparent 65%),
+      radial-gradient(ellipse 70%  50% at 50% 50%,  rgba(14,60,30,0.45)  0%, transparent 70%),
+      radial-gradient(ellipse 55%  40% at 15% 90%,  rgba(10,50,25,0.5)   0%, transparent 60%),
+      radial-gradient(ellipse 50%  35% at 90% 85%,  rgba(10,50,25,0.45)  0%, transparent 55%),
+      /* Felt weave texture */
+      repeating-linear-gradient( 45deg, rgba(255,255,255,0.028) 0, rgba(255,255,255,0.028) 1px, transparent 1px, transparent 6px),
+      repeating-linear-gradient(-45deg, rgba(255,255,255,0.028) 0, rgba(255,255,255,0.028) 1px, transparent 1px, transparent 6px);
   }
 
   h1, h2, h3 { font-family: 'Playfair Display', serif; }
@@ -61,8 +58,8 @@
     border: 1px solid var(--glass-edge);
     border-top-color: var(--glass-top);
     box-shadow:
-      0 0 0 1px rgba(0,0,0,0.5),
-      0 8px 40px rgba(0,0,0,0.55),
+      0 0 0 1px rgba(0,0,0,0.35),
+      0 8px 40px rgba(0,0,0,0.35),
       inset 0 1px 0 var(--glass-top);
   }
 
@@ -316,7 +313,7 @@
     width: 100%; max-width: 520px;
     border-radius: 24px 24px 0 0;
     padding: 1rem 1rem 2.4rem;
-    background: rgba(4,13,8,0.97);
+    background: rgba(8,28,16,0.97);
     backdrop-filter: blur(40px);
     -webkit-backdrop-filter: blur(40px);
     border: 1px solid rgba(212,168,32,0.18);
