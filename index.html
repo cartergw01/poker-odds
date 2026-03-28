@@ -349,6 +349,8 @@
     margin-bottom: 0.55rem; min-height: 0.85rem;
   }
   /* Ranks — two rows: face cards + number cards */
+  .picker-ranks-wrap { transition: opacity 0.15s; }
+  .picker-ranks-wrap.hidden-step { display: none; }
   .picker-rank-row { display: flex; gap: 5px; margin-bottom: 5px; }
   .rank-btn {
     flex: 1; height: 52px;
@@ -364,33 +366,38 @@
     -webkit-tap-highlight-color: transparent;
   }
   .rank-btn:active:not(:disabled) { transform: scale(0.9); }
-  .rank-btn.selected {
-    background: linear-gradient(145deg, #e8c030, #a87010);
-    border-color: var(--gold);
-    color: #0a0800;
-    box-shadow: 0 0 14px rgba(212,168,32,0.45);
-  }
   .rank-btn:disabled { opacity: 0.18; cursor: not-allowed; }
-  /* Suits — 4 big buttons */
+  /* Suits — hidden until rank picked, then big */
   .picker-suit-row {
-    display: grid; grid-template-columns: repeat(4,1fr);
-    gap: 6px; margin-top: 8px;
+    display: none;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
   }
+  .picker-suit-row.suit-step { display: grid; }
   .suit-btn {
-    height: 62px; border-radius: 13px;
-    border: 1.5px solid rgba(255,255,255,0.08);
-    background: rgba(255,255,255,0.03);
-    font-size: 1.75rem; cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    opacity: 0.25; transition: opacity 0.15s, transform 0.08s, border-color 0.15s;
+    height: 100px; border-radius: 16px;
+    border: 1.5px solid rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.05);
+    font-size: 3rem; cursor: pointer;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 0.2rem;
+    transition: transform 0.08s, background 0.12s, border-color 0.12s;
     -webkit-tap-highlight-color: transparent;
   }
-  .suit-btn.active { opacity: 1; }
-  .suit-btn.active.spades  { border-color: rgba(200,210,220,0.4); }
-  .suit-btn.active.clubs   { border-color: rgba(200,210,220,0.4); }
-  .suit-btn.active.hearts  { border-color: rgba(220,60,80,0.55); }
-  .suit-btn.active.diamonds{ border-color: rgba(220,60,80,0.55); }
-  .suit-btn.active:active  { transform: scale(0.9); }
+  .suit-btn .suit-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.52rem; letter-spacing: 0.14em;
+    opacity: 0.55; text-transform: uppercase;
+  }
+  .suit-btn.spades, .suit-btn.clubs { color: var(--cream); }
+  .suit-btn.hearts, .suit-btn.diamonds { color: #e8334a; }
+  .suit-btn:active:not(:disabled) { transform: scale(0.93); }
+  .suit-btn:disabled { opacity: 0.15; cursor: not-allowed; }
+  .picker-selected-rank {
+    text-align: center; font-family: 'Playfair Display', serif;
+    font-size: 1.8rem; font-weight: 700; color: var(--gold-light);
+    margin-bottom: 0.8rem; letter-spacing: 0.06em;
+  }
   .suit-btn:disabled       { opacity: 0.1; cursor: not-allowed; }
 
   body.light .picker-sheet { background: rgba(248,244,234,0.98); border-color: rgba(154,98,0,0.2); }
@@ -973,16 +980,18 @@
       <button class="picker-cancel" onclick="closePicker()">✕ Cancel</button>
     </div>
     <div class="picker-step-hint" id="picker-step-hint">Pick a rank</div>
-    <!-- Row 1: face cards -->
-    <div class="picker-rank-row" id="picker-ranks-face"></div>
-    <!-- Row 2: number cards -->
-    <div class="picker-rank-row" id="picker-ranks-num"></div>
-    <!-- Suits -->
-    <div class="picker-suit-row">
-      <button class="suit-btn spades"   data-suit="spades"   onclick="selectSuit(this)">♠</button>
-      <button class="suit-btn hearts"   data-suit="hearts"   onclick="selectSuit(this)">♥</button>
-      <button class="suit-btn diamonds" data-suit="diamonds" onclick="selectSuit(this)">♦</button>
-      <button class="suit-btn clubs"    data-suit="clubs"    onclick="selectSuit(this)">♣</button>
+    <!-- Rank rows (hidden after rank picked) -->
+    <div class="picker-ranks-wrap" id="picker-ranks-wrap">
+      <div class="picker-rank-row" id="picker-ranks-face"></div>
+      <div class="picker-rank-row" id="picker-ranks-num"></div>
+    </div>
+    <!-- Selected rank display + suits (shown after rank picked) -->
+    <div class="picker-selected-rank" id="picker-selected-rank" style="display:none"></div>
+    <div class="picker-suit-row" id="picker-suit-row">
+      <button class="suit-btn spades"   data-suit="spades"   onclick="selectSuit(this)">♠<span class="suit-label">Spades</span></button>
+      <button class="suit-btn hearts"   data-suit="hearts"   onclick="selectSuit(this)">♥<span class="suit-label">Hearts</span></button>
+      <button class="suit-btn diamonds" data-suit="diamonds" onclick="selectSuit(this)">♦<span class="suit-label">Diamonds</span></button>
+      <button class="suit-btn clubs"    data-suit="clubs"    onclick="selectSuit(this)">♣<span class="suit-label">Clubs</span></button>
     </div>
   </div>
 </div>
@@ -1414,6 +1423,11 @@ function openPicker(target) {
     btn.disabled = true;
   });
 
+  // Reset to rank step
+  document.getElementById('picker-ranks-wrap').classList.remove('hidden-step');
+  document.getElementById('picker-selected-rank').style.display = 'none';
+  document.getElementById('picker-suit-row').classList.remove('suit-step');
+
   document.getElementById('picker-modal').classList.remove('hidden');
 }
 
@@ -1430,19 +1444,21 @@ function handlePickerOverlayClick(e) {
 
 function selectRank(btn) {
   if (btn.disabled) return;
-  document.querySelectorAll('.rank-btn').forEach(b => b.classList.remove('selected'));
-  btn.classList.add('selected');
   pickerRank = btn.dataset.rank;
 
-  // Enable suits that aren't already taken
+  // Hide ranks, show suit step
+  document.getElementById('picker-ranks-wrap').classList.add('hidden-step');
+  const rankDisplay = document.getElementById('picker-selected-rank');
+  rankDisplay.textContent = pickerRank;
+  rankDisplay.style.display = 'block';
+  document.getElementById('picker-suit-row').classList.add('suit-step');
+  document.getElementById('picker-step-hint').textContent = 'Now pick a suit';
+
+  // Enable only suits that aren't taken
   const used = new Set(getAllSelectedCards().map(cardKey));
   document.querySelectorAll('.suit-btn').forEach(sb => {
-    const taken = used.has(pickerRank + '_' + sb.dataset.suit);
-    sb.disabled = taken;
-    sb.classList.toggle('active', !taken);
+    sb.disabled = used.has(pickerRank + '_' + sb.dataset.suit);
   });
-
-  document.getElementById('picker-step-hint').textContent = 'Now pick a suit';
 }
 
 function selectSuit(btn) {
