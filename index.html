@@ -306,52 +306,98 @@
   }
   .modal-box input:focus { border-color: rgba(212,168,32,0.6); }
 
-  /* Picker modal */
-  #picker-modal { z-index: 999; }
-  .picker-box {
-    border-radius: 20px;
-    padding: 1.6rem;
-    max-width: 370px; width: 94%;
+  /* ── TAP PICKER (bottom sheet, 2-step) ── */
+  #picker-modal {
+    z-index: 999;
+    align-items: flex-end;
+    justify-content: center;
   }
-  .picker-box h3 {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.15rem;
-    color: var(--gold-light);
-    margin-bottom: 1.1rem;
-    letter-spacing: 0.02em;
+  .picker-sheet {
+    width: 100%; max-width: 520px;
+    border-radius: 24px 24px 0 0;
+    padding: 1rem 1rem 2.4rem;
+    background: rgba(4,13,8,0.97);
+    backdrop-filter: blur(40px);
+    -webkit-backdrop-filter: blur(40px);
+    border: 1px solid rgba(212,168,32,0.18);
+    border-bottom: none;
+    box-shadow: 0 -6px 40px rgba(0,0,0,0.65);
+    animation: sheetUp 0.22s cubic-bezier(0.22,1,0.36,1);
   }
-  .picker-ranks, .picker-suits {
-    display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 1rem;
+  @keyframes sheetUp {
+    from { transform: translateY(50px); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
   }
-  .rank-btn, .suit-btn {
-    width: 44px; height: 44px;
-    background: rgba(255,255,255,0.04);
+  .picker-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 0.2rem; margin-bottom: 0.9rem;
+  }
+  .picker-title {
+    font-size: 0.58rem; letter-spacing: 0.24em; text-transform: uppercase;
+    color: var(--gold); opacity: 0.6;
+  }
+  .picker-cancel {
+    background: none; border: none; color: var(--muted);
+    font-family: 'IBM Plex Mono', monospace; font-size: 0.68rem;
+    letter-spacing: 0.08em; opacity: 0.5; cursor: pointer; padding: 0.2rem 0.4rem;
+    transition: opacity 0.15s;
+  }
+  .picker-cancel:hover { opacity: 1; }
+  .picker-step-hint {
+    text-align: center; font-size: 0.56rem; letter-spacing: 0.16em;
+    color: var(--gold); opacity: 0.5; text-transform: uppercase;
+    margin-bottom: 0.55rem; min-height: 0.85rem;
+  }
+  /* Ranks — two rows: face cards + number cards */
+  .picker-rank-row { display: flex; gap: 5px; margin-bottom: 5px; }
+  .rank-btn {
+    flex: 1; height: 52px;
+    background: rgba(255,255,255,0.05);
     border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 10px;
+    border-radius: 11px;
     color: var(--cream);
     font-family: 'Playfair Display', serif;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: all 0.15s;
+    font-size: 1.05rem; font-weight: 700;
+    cursor: pointer; min-width: 0;
+    transition: background 0.1s, border-color 0.1s, transform 0.08s;
     display: flex; align-items: center; justify-content: center;
+    -webkit-tap-highlight-color: transparent;
   }
-  .rank-btn:hover:not(:disabled), .suit-btn:hover:not(:disabled) {
-    border-color: rgba(212,168,32,0.5);
-    color: var(--gold-light);
-    background: rgba(212,168,32,0.1);
-    transform: scale(1.06);
-  }
-  .rank-btn.selected, .suit-btn.selected {
-    background: linear-gradient(145deg, #e8c030, #b08010);
-    color: #0a0800;
+  .rank-btn:active:not(:disabled) { transform: scale(0.9); }
+  .rank-btn.selected {
+    background: linear-gradient(145deg, #e8c030, #a87010);
     border-color: var(--gold);
-    box-shadow: 0 0 16px rgba(212,168,32,0.5);
-    transform: scale(1.06);
+    color: #0a0800;
+    box-shadow: 0 0 14px rgba(212,168,32,0.45);
   }
-  .rank-btn:disabled, .suit-btn:disabled { opacity: 0.2; cursor: not-allowed; }
-  .suit-btn.hearts, .suit-btn.diamonds { color: var(--red); }
-  .suit-btn.hearts.selected, .suit-btn.diamonds.selected { color: #1a0000; }
-  .picker-actions { display: flex; gap: 0.6rem; justify-content: flex-end; margin-top: 0.4rem; }
+  .rank-btn:disabled { opacity: 0.18; cursor: not-allowed; }
+  /* Suits — 4 big buttons */
+  .picker-suit-row {
+    display: grid; grid-template-columns: repeat(4,1fr);
+    gap: 6px; margin-top: 8px;
+  }
+  .suit-btn {
+    height: 62px; border-radius: 13px;
+    border: 1.5px solid rgba(255,255,255,0.08);
+    background: rgba(255,255,255,0.03);
+    font-size: 1.75rem; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0.25; transition: opacity 0.15s, transform 0.08s, border-color 0.15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .suit-btn.active { opacity: 1; }
+  .suit-btn.active.spades  { border-color: rgba(200,210,220,0.4); }
+  .suit-btn.active.clubs   { border-color: rgba(200,210,220,0.4); }
+  .suit-btn.active.hearts  { border-color: rgba(220,60,80,0.55); }
+  .suit-btn.active.diamonds{ border-color: rgba(220,60,80,0.55); }
+  .suit-btn.active:active  { transform: scale(0.9); }
+  .suit-btn:disabled       { opacity: 0.1; cursor: not-allowed; }
+
+  body.light .picker-sheet { background: rgba(248,244,234,0.98); border-color: rgba(154,98,0,0.2); }
+  body.light .rank-btn { background: rgba(0,0,0,0.05); border-color: rgba(0,0,0,0.12); color: var(--cream); }
+  body.light .suit-btn { background: rgba(0,0,0,0.03); border-color: rgba(0,0,0,0.08); }
+  body.light .suit-btn.active.spades, body.light .suit-btn.active.clubs { border-color: rgba(0,0,0,0.3); }
+  body.light .suit-btn.active.hearts, body.light .suit-btn.active.diamonds { border-color: rgba(200,20,40,0.4); }
 
 
   /* ── PLAYERS (compact header) ── */
@@ -919,20 +965,24 @@
 
 <canvas id="chip-canvas"></canvas>
 
-<!-- Card Picker Modal -->
-<div id="picker-modal" class="modal-overlay hidden">
-  <div class="picker-box glass">
-    <h3>Select Card</h3>
-    <div class="picker-ranks" id="picker-ranks"></div>
-    <div class="picker-suits" id="picker-suits">
-      <button class="suit-btn spades" data-suit="spades" onclick="selectSuit(this)">♠</button>
-      <button class="suit-btn hearts" data-suit="hearts" onclick="selectSuit(this)">♥</button>
-      <button class="suit-btn diamonds" data-suit="diamonds" onclick="selectSuit(this)">♦</button>
-      <button class="suit-btn clubs" data-suit="clubs" onclick="selectSuit(this)">♣</button>
+<!-- Card Picker — Bottom Sheet, 2-step tap -->
+<div id="picker-modal" class="modal-overlay hidden" onclick="handlePickerOverlayClick(event)">
+  <div class="picker-sheet" onclick="event.stopPropagation()">
+    <div class="picker-header">
+      <span class="picker-title" id="picker-title">Add Card</span>
+      <button class="picker-cancel" onclick="closePicker()">✕ Cancel</button>
     </div>
-    <div class="picker-actions">
-      <button class="btn" onclick="closePicker()">Cancel</button>
-      <button class="btn primary" id="picker-confirm" onclick="confirmPicker()" disabled>Add Card</button>
+    <div class="picker-step-hint" id="picker-step-hint">Pick a rank</div>
+    <!-- Row 1: face cards -->
+    <div class="picker-rank-row" id="picker-ranks-face"></div>
+    <!-- Row 2: number cards -->
+    <div class="picker-rank-row" id="picker-ranks-num"></div>
+    <!-- Suits -->
+    <div class="picker-suit-row">
+      <button class="suit-btn spades"   data-suit="spades"   onclick="selectSuit(this)">♠</button>
+      <button class="suit-btn hearts"   data-suit="hearts"   onclick="selectSuit(this)">♥</button>
+      <button class="suit-btn diamonds" data-suit="diamonds" onclick="selectSuit(this)">♦</button>
+      <button class="suit-btn clubs"    data-suit="clubs"    onclick="selectSuit(this)">♣</button>
     </div>
   </div>
 </div>
@@ -1314,18 +1364,24 @@ window.addEventListener('load', () => {
 });
 
 // ═══════════════════════════════════════════════════
-//  CARD PICKER
+//  CARD PICKER — 2-step tap (rank → suit → done)
 // ═══════════════════════════════════════════════════
+const FACE_RANKS = ['A','K','Q','J','10'];
+const NUM_RANKS  = ['9','8','7','6','5','4','3','2'];
+
 function buildRankButtons() {
-  const container = document.getElementById('picker-ranks');
-  RANKS.forEach(r => {
+  function makeBtn(r, container) {
     const btn = document.createElement('button');
     btn.className = 'rank-btn';
     btn.dataset.rank = r;
     btn.textContent = r;
     btn.onclick = () => selectRank(btn);
     container.appendChild(btn);
-  });
+  }
+  const face = document.getElementById('picker-ranks-face');
+  const num  = document.getElementById('picker-ranks-num');
+  FACE_RANKS.forEach(r => makeBtn(r, face));
+  NUM_RANKS.forEach(r  => makeBtn(r, num));
 }
 
 function getAllSelectedCards() {
@@ -1338,21 +1394,26 @@ function openPicker(target) {
   pickerTarget = target;
   pickerRank = null;
   pickerSuit = null;
-  const used = new Set(getAllSelectedCards().map(cardKey));
 
-  // Reset rank buttons
+  const titles = { hole:'Pocket Card', flop:'Flop Card', turn:'Turn Card', river:'River Card' };
+  document.getElementById('picker-title').textContent = titles[target] || 'Add Card';
+  document.getElementById('picker-step-hint').textContent = 'Pick a rank';
+
+  // Reset ranks — disable any whose entire suit set is taken
+  const used = new Set(getAllSelectedCards().map(cardKey));
+  const suits = ['spades','hearts','diamonds','clubs'];
   document.querySelectorAll('.rank-btn').forEach(btn => {
     btn.classList.remove('selected');
-    btn.disabled = false;
+    const allTaken = suits.every(s => used.has(btn.dataset.rank + '_' + s));
+    btn.disabled = allTaken;
   });
 
-  // Disable suit buttons for used combos
+  // Suits start dimmed
   document.querySelectorAll('.suit-btn').forEach(btn => {
-    btn.classList.remove('selected');
-    btn.disabled = false;
+    btn.classList.remove('active');
+    btn.disabled = true;
   });
 
-  document.getElementById('picker-confirm').disabled = true;
   document.getElementById('picker-modal').classList.remove('hidden');
 }
 
@@ -1363,29 +1424,38 @@ function closePicker() {
   pickerSuit = null;
 }
 
+function handlePickerOverlayClick(e) {
+  if (e.target === document.getElementById('picker-modal')) closePicker();
+}
+
 function selectRank(btn) {
+  if (btn.disabled) return;
   document.querySelectorAll('.rank-btn').forEach(b => b.classList.remove('selected'));
   btn.classList.add('selected');
   pickerRank = btn.dataset.rank;
-  pickerSuit = null;
 
-  // Disable suits that form used combos
+  // Enable suits that aren't already taken
   const used = new Set(getAllSelectedCards().map(cardKey));
   document.querySelectorAll('.suit-btn').forEach(sb => {
-    sb.classList.remove('selected');
-    const key = pickerRank + '_' + sb.dataset.suit;
-    sb.disabled = used.has(key);
+    const taken = used.has(pickerRank + '_' + sb.dataset.suit);
+    sb.disabled = taken;
+    sb.classList.toggle('active', !taken);
   });
 
-  document.getElementById('picker-confirm').disabled = true;
+  document.getElementById('picker-step-hint').textContent = 'Now pick a suit';
 }
 
 function selectSuit(btn) {
-  if (btn.disabled) return;
-  document.querySelectorAll('.suit-btn').forEach(b => b.classList.remove('selected'));
-  btn.classList.add('selected');
+  if (!pickerRank || btn.disabled) return;
   pickerSuit = btn.dataset.suit;
-  document.getElementById('picker-confirm').disabled = !(pickerRank && pickerSuit);
+  // Immediately add the card — no confirm step
+  const cards = getStageCards(pickerTarget);
+  const limit = getStageLimit(pickerTarget);
+  if (cards.length >= limit) { closePicker(); return; }
+  cards.push({ rank: pickerRank, suit: pickerSuit });
+  closePicker();
+  renderAll();
+  scheduleCalc();
 }
 
 function getStageLimit(target) {
@@ -1397,17 +1467,6 @@ function getStageLimit(target) {
 function getStageCards(target) {
   if (target === 'hole') return holeCards;
   return community[target];
-}
-
-function confirmPicker() {
-  if (!pickerRank || !pickerSuit) return;
-  const cards = getStageCards(pickerTarget);
-  const limit = getStageLimit(pickerTarget);
-  if (cards.length >= limit) return;
-  cards.push({ rank: pickerRank, suit: pickerSuit });
-  closePicker();
-  renderAll();
-  scheduleCalc();
 }
 
 
