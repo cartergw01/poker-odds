@@ -956,6 +956,47 @@
   .theme-toggle:hover { opacity: 1; border-color: rgba(212,168,32,0.6); }
   .theme-toggle .toggle-icon { font-size: 0.85rem; }
 
+  /* ── WIN STATE COLORS (dynamic based on win %) ── */
+  .odds-card-win.state-even .odds-card-num {
+    background: linear-gradient(160deg,#ffe590,#d4a820,#a07010);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    filter: drop-shadow(0 0 12px rgba(212,168,32,0.4));
+  }
+  .odds-card-win.state-bad .odds-card-num {
+    background: linear-gradient(160deg,#ffb070,#e8703a,#c04010);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    filter: drop-shadow(0 0 10px rgba(232,100,50,0.35));
+  }
+  .odds-bar-num.win-color.state-even {
+    background: linear-gradient(160deg,#ffe590,#d4a820,#a07010);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    filter: drop-shadow(0 0 10px rgba(212,168,32,0.4));
+  }
+  .odds-bar-num.win-color.state-bad {
+    background: linear-gradient(160deg,#ffb070,#e8703a,#c04010);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    filter: drop-shadow(0 0 10px rgba(232,100,50,0.35));
+  }
+
+  /* ── TIE ROW ── */
+  .tie-row {
+    display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+    margin-top: 0.55rem; padding: 0.3rem 0.9rem;
+    background: rgba(232,160,32,0.07);
+    border: 1px solid rgba(232,160,32,0.18);
+    border-radius: 8px;
+  }
+  .tie-label {
+    font-size: 0.58rem; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--tie); opacity: 0.65;
+  }
+  .tie-pct {
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem; font-weight: 700;
+    color: var(--tie);
+    filter: drop-shadow(0 0 6px rgba(232,160,32,0.3));
+  }
+
   /* ── PREFLOP INLINE ── */
   .preflop-inline-wrap {
     overflow: hidden;
@@ -1147,6 +1188,10 @@
           <div class="odds-card-num" id="loss-pct">—</div>
           <div class="odds-delta" id="delta-loss"></div>
         </div>
+      </div>
+      <div class="tie-row" id="tie-row" style="display:none">
+        <span class="tie-label">TIE</span>
+        <span class="tie-pct" id="tie-pct">—</span>
       </div>
       <div class="players-inline">
         <span class="players-inline-label">Active players</span>
@@ -1477,9 +1522,14 @@ function selectSuit(btn) {
   const limit = getStageLimit(pickerTarget);
   if (cards.length >= limit) { closePicker(); return; }
   cards.push({ rank: pickerRank, suit: pickerSuit });
+  const savedTarget = pickerTarget;
   closePicker();
   renderAll();
   scheduleCalc();
+  // Auto-advance: immediately reopen for 2nd hole card
+  if (savedTarget === 'hole' && holeCards.length < 2) {
+    setTimeout(() => openPicker('hole'), 80);
+  }
 }
 
 function getStageLimit(target) {
@@ -1642,6 +1692,7 @@ function resetAll() {
   document.getElementById('delta-win').className = 'odds-delta';
   document.getElementById('delta-loss').className = 'odds-delta';
   document.getElementById('odds-bar').classList.add('hidden');
+  document.getElementById('tie-row').style.display = 'none';
   renderAll();
 }
 
@@ -1886,6 +1937,21 @@ function displayOdds(result, label, outs, streetLabel) {
   document.getElementById('win-pct').textContent  = displayWin.toFixed(1) + '%';
   document.getElementById('loss-pct').textContent = result.loss.toFixed(1) + '%';
 
+  // Dynamic win color: green >55%, amber 42–55%, orange-red <42%
+  const winCard = document.querySelector('.odds-card-win');
+  winCard.classList.remove('state-even', 'state-bad');
+  if (displayWin < 42) winCard.classList.add('state-bad');
+  else if (displayWin < 55) winCard.classList.add('state-even');
+
+  // Tie % display
+  const tieRow = document.getElementById('tie-row');
+  if (result.tie >= 0.5) {
+    document.getElementById('tie-pct').textContent = result.tie.toFixed(1) + '%';
+    tieRow.style.display = 'flex';
+  } else {
+    tieRow.style.display = 'none';
+  }
+
   // Street badge
   const badge = document.getElementById('street-badge');
   badge.textContent = streetLabel.toUpperCase();
@@ -1921,6 +1987,10 @@ function displayOdds(result, label, outs, streetLabel) {
   const bar = document.getElementById('odds-bar');
   document.getElementById('bar-win-pct').textContent  = displayWin.toFixed(1) + '%';
   document.getElementById('bar-loss-pct').textContent = result.loss.toFixed(1) + '%';
+  const barWin = document.getElementById('bar-win-pct');
+  barWin.classList.remove('state-even', 'state-bad');
+  if (displayWin < 42) barWin.classList.add('state-bad');
+  else if (displayWin < 55) barWin.classList.add('state-even');
   document.getElementById('bar-street').textContent   = streetLabel.toUpperCase();
   document.getElementById('bar-hand').textContent     = label;
   if (prevWinPct !== null || true) {
