@@ -1737,11 +1737,7 @@ function adjustPlayers(delta) {
 }
 
 function resetHole() {
-  holeCards = [];
-  equityHistory = [];
-  prevWinPct = null;
-  renderAll();
-  scheduleCalc();
+  resetAll();
 }
 
 function resetStage(stage) {
