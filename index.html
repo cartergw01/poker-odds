@@ -105,6 +105,13 @@
     letter-spacing: 0.22em;
     margin-top: 0.6rem;
   }
+  .made-by {
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.68rem;
+    letter-spacing: 0.22em;
+    padding: 24px 0 16px;
+  }
 
   /* ── SECTION ── */
   .section {
@@ -1234,7 +1241,6 @@
     </button>
     <div class="header-eyebrow">Texas Hold'em</div>
     <h1>Poker Odds</h1>
-    <div class="sub">made by Carter</div>
     <div class="players-compact">
       <span class="players-compact-label">Players</span>
       <button class="stepper-btn" onclick="adjustPlayers(-1)">−</button>
@@ -1481,6 +1487,7 @@
       <div class="odds-bar-delta" id="bar-delta-loss"></div>
     </div>
   </div>
+  <div class="made-by">made by Carter</div>
 </div>
 
 <script>
@@ -1714,9 +1721,9 @@ function selectRank(btn) {
   // Show suit step
   document.getElementById('picker-step-hint').textContent = 'Pick a suit';
   document.getElementById('picker-selected-rank').textContent = pickerSelectedRank;
-  document.getElementById('picker-selected-rank').style.display = '';
+  document.getElementById('picker-selected-rank').style.display = 'block';
   document.getElementById('picker-ranks-wrap').style.display = 'none';
-  document.getElementById('picker-suit-row').style.display = '';
+  document.getElementById('picker-suit-row').style.display = 'grid';
 
   // Disable taken suits
   const used = new Set(getAllSelectedCards().map(cardKey));
