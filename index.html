@@ -364,6 +364,7 @@
   }
   .rank-btn:active:not(:disabled) { transform: scale(0.9); }
   .rank-btn:disabled { opacity: 0.18; cursor: not-allowed; }
+  .rank-btn.selected { background: rgba(255,255,255,0.18); border-color: rgba(255,255,255,0.5); }
   /* Suits — hidden until rank picked, then big */
   .picker-suit-row {
     display: none;
@@ -1203,20 +1204,25 @@
 
 <canvas id="chip-canvas"></canvas>
 
-<!-- Card Picker — Bottom Sheet, single-tap grid -->
+<!-- Card Picker — Bottom Sheet, 2-step tap -->
 <div id="picker-modal" class="modal-overlay hidden" onclick="handlePickerOverlayClick(event)">
   <div class="picker-sheet" onclick="event.stopPropagation()">
     <div class="picker-header">
       <span class="picker-title" id="picker-title">Add Card</span>
       <button class="picker-cancel" onclick="closePicker()">✕ Cancel</button>
     </div>
-    <div class="picker-grid-header">
-      <div class="picker-suit-header">♠</div>
-      <div class="picker-suit-header red">♥</div>
-      <div class="picker-suit-header red">♦</div>
-      <div class="picker-suit-header">♣</div>
+    <div class="picker-step-hint" id="picker-step-hint">Pick a rank</div>
+    <div class="picker-ranks-wrap" id="picker-ranks-wrap">
+      <div class="picker-rank-row" id="picker-ranks-face"></div>
+      <div class="picker-rank-row" id="picker-ranks-num"></div>
     </div>
-    <div class="picker-grid" id="picker-grid"></div>
+    <div class="picker-selected-rank" id="picker-selected-rank" style="display:none"></div>
+    <div class="picker-suit-row" id="picker-suit-row">
+      <button class="suit-btn spades"   data-suit="spades"   onclick="selectSuit(this)">♠<span class="suit-label">Spades</span></button>
+      <button class="suit-btn hearts"   data-suit="hearts"   onclick="selectSuit(this)">♥<span class="suit-label">Hearts</span></button>
+      <button class="suit-btn diamonds" data-suit="diamonds" onclick="selectSuit(this)">♦<span class="suit-label">Diamonds</span></button>
+      <button class="suit-btn clubs"    data-suit="clubs"    onclick="selectSuit(this)">♣<span class="suit-label">Clubs</span></button>
+    </div>
   </div>
 </div>
 
@@ -1634,30 +1640,31 @@ const RED_SUITS = new Set(['hearts','diamonds']);
 //  INIT
 // ═══════════════════════════════════════════════════
 window.addEventListener('load', () => {
-  buildPickerGrid();
+  buildRankButtons();
   renderAll();
 });
 
 // ═══════════════════════════════════════════════════
-//  CARD PICKER — single-tap grid (rank rows × suit cols)
+//  CARD PICKER — 2-step: rank → suit
 // ═══════════════════════════════════════════════════
-const PICKER_RANKS = ['A','K','Q','J','10','9','8','7','6','5','4','3','2'];
-const PICKER_SUITS = ['spades','hearts','diamonds','clubs'];
+const FACE_RANKS = ['A','K','Q','J','10'];
+const NUM_RANKS  = ['9','8','7','6','5','4','3','2'];
 
-function buildPickerGrid() {
-  const grid = document.getElementById('picker-grid');
-  grid.innerHTML = '';
-  PICKER_RANKS.forEach(r => {
-    PICKER_SUITS.forEach(s => {
-      const btn = document.createElement('button');
-      btn.className = 'picker-card-btn' + (RED_SUITS.has(s) ? ' red' : '');
-      btn.dataset.rank = r;
-      btn.dataset.suit = s;
-      btn.innerHTML = r + '<br>' + SUIT_SYM[s];
-      btn.onclick = () => selectCard(btn);
-      grid.appendChild(btn);
-    });
-  });
+let pickerSelectedRank = null;
+
+function buildRankButtons() {
+  function makeBtn(r, container) {
+    const btn = document.createElement('button');
+    btn.className = 'rank-btn';
+    btn.dataset.rank = r;
+    btn.textContent = r;
+    btn.onclick = () => selectRank(btn);
+    container.appendChild(btn);
+  }
+  const face = document.getElementById('picker-ranks-face');
+  const num  = document.getElementById('picker-ranks-num');
+  if (face) FACE_RANKS.forEach(r => makeBtn(r, face));
+  if (num)  NUM_RANKS.forEach(r  => makeBtn(r, num));
 }
 
 function getAllSelectedCards() {
@@ -1669,37 +1676,73 @@ function cardKey(c) { return c.rank + '_' + c.suit; }
 function openPicker(target, replaceIdx = null) {
   pickerTarget = target;
   pickerReplaceIdx = replaceIdx;
+  pickerSelectedRank = null;
 
   const titles = { hole: replaceIdx !== null ? 'Swap Card' : 'Pocket Card', flop: replaceIdx !== null ? 'Swap Card' : 'Flop Card', turn: replaceIdx !== null ? 'Swap Card' : 'Turn Card', river: replaceIdx !== null ? 'Swap Card' : 'River Card' };
   document.getElementById('picker-title').textContent = titles[target] || 'Pick Card';
 
-  // Build used set — exclude the card being replaced so it can be re-picked
+  // Reset to rank step
+  document.getElementById('picker-step-hint').textContent = 'Pick a rank';
+  document.getElementById('picker-ranks-wrap').style.display = '';
+  document.getElementById('picker-selected-rank').style.display = 'none';
+  document.getElementById('picker-suit-row').style.display = 'none';
+
+  // Grey out ranks where ALL suits of that rank are taken
   const used = new Set(getAllSelectedCards().map(cardKey));
   if (replaceIdx !== null) {
     const replacing = getStageCards(target)[replaceIdx];
     if (replacing) used.delete(cardKey(replacing));
   }
-
-  document.querySelectorAll('.picker-card-btn').forEach(btn => {
-    btn.disabled = used.has(btn.dataset.rank + '_' + btn.dataset.suit);
+  const suits = ['spades','hearts','diamonds','clubs'];
+  document.querySelectorAll('.rank-btn').forEach(btn => {
+    const r = btn.dataset.rank;
+    btn.disabled = suits.every(s => used.has(r + '_' + s));
+    btn.classList.remove('selected');
   });
 
   document.getElementById('picker-modal').classList.remove('hidden');
+}
+
+function selectRank(btn) {
+  if (btn.disabled) return;
+  pickerSelectedRank = btn.dataset.rank;
+
+  // Highlight chosen rank
+  document.querySelectorAll('.rank-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+
+  // Show suit step
+  document.getElementById('picker-step-hint').textContent = 'Pick a suit';
+  document.getElementById('picker-selected-rank').textContent = pickerSelectedRank;
+  document.getElementById('picker-selected-rank').style.display = '';
+  document.getElementById('picker-ranks-wrap').style.display = 'none';
+  document.getElementById('picker-suit-row').style.display = '';
+
+  // Disable taken suits
+  const used = new Set(getAllSelectedCards().map(cardKey));
+  if (pickerReplaceIdx !== null) {
+    const replacing = getStageCards(pickerTarget)[pickerReplaceIdx];
+    if (replacing) used.delete(cardKey(replacing));
+  }
+  document.querySelectorAll('.suit-btn').forEach(btn => {
+    btn.disabled = used.has(pickerSelectedRank + '_' + btn.dataset.suit);
+  });
 }
 
 function closePicker() {
   document.getElementById('picker-modal').classList.add('hidden');
   pickerTarget = null;
   pickerReplaceIdx = null;
+  pickerSelectedRank = null;
 }
 
 function handlePickerOverlayClick(e) {
   if (e.target === document.getElementById('picker-modal')) closePicker();
 }
 
-function selectCard(btn) {
-  if (btn.disabled) return;
-  const rank = btn.dataset.rank;
+function selectSuit(btn) {
+  if (btn.disabled || !pickerSelectedRank) return;
+  const rank = pickerSelectedRank;
   const suit = btn.dataset.suit;
   const cards = getStageCards(pickerTarget);
   const limit = getStageLimit(pickerTarget);
