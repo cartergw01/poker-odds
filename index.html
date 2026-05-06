@@ -1078,33 +1078,145 @@
     pointer-events: none;
     z-index: 9999;
   }
+
+  /* ── CARD PICKER GRID (single-tap) ── */
+  .picker-grid-header {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 4px;
+    margin-bottom: 4px;
+  }
+  .picker-suit-header {
+    text-align: center;
+    font-size: 1.3rem;
+    padding: 0.2rem 0;
+  }
+  .picker-suit-header.red { color: #e8334a; }
+  .picker-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 4px;
+    max-height: 58vh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .picker-card-btn {
+    height: 44px;
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.05);
+    color: var(--cream);
+    font-family: 'Playfair Display', serif;
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.1s, border-color 0.1s, transform 0.08s;
+    display: flex; align-items: center; justify-content: center;
+    line-height: 1.1;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .picker-card-btn.red { color: #e8334a; }
+  .picker-card-btn:not(:disabled):hover { background: rgba(212,168,32,0.15); border-color: rgba(212,168,32,0.5); }
+  .picker-card-btn:active:not(:disabled) { transform: scale(0.88); }
+  .picker-card-btn:disabled { opacity: 0.13; cursor: not-allowed; }
+  body.light .picker-card-btn { background: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.1); color: #111; }
+  body.light .picker-card-btn.red { color: #cc1122; }
+
+  /* ── NUM STEPPER ── */
+  .num-stepper {
+    display: flex; align-items: stretch;
+    background: rgba(0,0,0,0.4);
+    border: 1px solid rgba(212,168,32,0.2);
+    border-radius: 10px;
+    overflow: hidden;
+    width: 140px;
+    transition: border-color 0.2s;
+  }
+  .num-stepper:focus-within { border-color: rgba(212,168,32,0.55); }
+  .num-stepper-btn {
+    width: 36px;
+    background: rgba(255,255,255,0.04);
+    border: none;
+    color: var(--gold-light);
+    font-size: 1.15rem;
+    cursor: pointer;
+    transition: background 0.15s;
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .num-stepper-btn:hover { background: rgba(212,168,32,0.15); }
+  .num-stepper-btn:active { background: rgba(212,168,32,0.28); }
+  .num-stepper-field {
+    flex: 1; min-width: 0;
+    background: none; border: none; outline: none;
+    text-align: center;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.88rem;
+    color: var(--cream);
+    padding: 0.5rem 0;
+    cursor: text;
+  }
+  body.light .num-stepper { background: rgba(0,0,0,0.05); border-color: rgba(0,0,0,0.18); }
+  body.light .num-stepper-field { color: var(--cream); }
+  body.light .num-stepper-btn { color: var(--gold); }
+
+  /* ── HAND HISTORY ── */
+  .history-hand {
+    display: flex; align-items: center; gap: 0.6rem;
+    padding: 0.65rem 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    flex-wrap: wrap;
+  }
+  .history-hand:last-child { border-bottom: none; }
+  .history-cards { display: flex; gap: 0.25rem; flex-wrap: wrap; }
+  .history-divider {
+    width: 1px; height: 28px;
+    background: rgba(255,255,255,0.1);
+    align-self: center;
+    flex-shrink: 0;
+  }
+  .history-mini-card {
+    width: 26px; height: 38px;
+    background: linear-gradient(160deg,#fff 0%,#f5f0e8 100%);
+    border-radius: 5px;
+    border: 1px solid rgba(0,0,0,0.1);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    font-family: 'Playfair Display', serif;
+    font-size: 0.6rem; font-weight: 700;
+    line-height: 1.1;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.45);
+    flex-shrink: 0;
+  }
+  .history-mini-card.red { color: #c01030; }
+  .history-mini-card.black { color: #111; }
+  .history-meta { font-size: 0.68rem; color: var(--muted); flex: 1; min-width: 60px; }
+  .history-win { font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 700; flex-shrink: 0; }
+  .history-win.good { color: #1fdb6e; filter: drop-shadow(0 0 5px rgba(31,219,110,0.3)); }
+  .history-win.bad  { color: #e8334a; filter: drop-shadow(0 0 5px rgba(232,51,74,0.3)); }
+  .history-win.even { color: #d4a820; filter: drop-shadow(0 0 5px rgba(212,168,32,0.3)); }
+  .history-empty { font-size: 0.78rem; color: var(--muted); font-style: italic; text-align: center; padding: 0.8rem 0; }
 </style>
 </head>
 <body>
 
 <canvas id="chip-canvas"></canvas>
 
-<!-- Card Picker — Bottom Sheet, 2-step tap -->
+<!-- Card Picker — Bottom Sheet, single-tap grid -->
 <div id="picker-modal" class="modal-overlay hidden" onclick="handlePickerOverlayClick(event)">
   <div class="picker-sheet" onclick="event.stopPropagation()">
     <div class="picker-header">
       <span class="picker-title" id="picker-title">Add Card</span>
       <button class="picker-cancel" onclick="closePicker()">✕ Cancel</button>
     </div>
-    <div class="picker-step-hint" id="picker-step-hint">Pick a rank</div>
-    <!-- Rank rows (hidden after rank picked) -->
-    <div class="picker-ranks-wrap" id="picker-ranks-wrap">
-      <div class="picker-rank-row" id="picker-ranks-face"></div>
-      <div class="picker-rank-row" id="picker-ranks-num"></div>
+    <div class="picker-grid-header">
+      <div class="picker-suit-header">♠</div>
+      <div class="picker-suit-header red">♥</div>
+      <div class="picker-suit-header red">♦</div>
+      <div class="picker-suit-header">♣</div>
     </div>
-    <!-- Selected rank display + suits (shown after rank picked) -->
-    <div class="picker-selected-rank" id="picker-selected-rank" style="display:none"></div>
-    <div class="picker-suit-row" id="picker-suit-row">
-      <button class="suit-btn spades"   data-suit="spades"   onclick="selectSuit(this)">♠<span class="suit-label">Spades</span></button>
-      <button class="suit-btn hearts"   data-suit="hearts"   onclick="selectSuit(this)">♥<span class="suit-label">Hearts</span></button>
-      <button class="suit-btn diamonds" data-suit="diamonds" onclick="selectSuit(this)">♦<span class="suit-label">Diamonds</span></button>
-      <button class="suit-btn clubs"    data-suit="clubs"    onclick="selectSuit(this)">♣<span class="suit-label">Clubs</span></button>
-    </div>
+    <div class="picker-grid" id="picker-grid"></div>
   </div>
 </div>
 
@@ -1172,11 +1284,19 @@
         <div style="display:flex;align-items:center;gap:0.6rem;flex-wrap:wrap">
           <div class="input-group">
             <label>BIG BLINDS</label>
-            <input type="number" id="raise-size-bb" placeholder="2.5" min="1" step="0.5" oninput="updateRaiseDisplay()">
+            <div class="num-stepper">
+              <button class="num-stepper-btn" onclick="stepInput('raise-size-bb',-0.5,1,updateRaiseDisplay)">−</button>
+              <input type="number" id="raise-size-bb" class="num-stepper-field" placeholder="2.5" min="1" step="0.5" oninput="updateRaiseDisplay()">
+              <button class="num-stepper-btn" onclick="stepInput('raise-size-bb',0.5,1,updateRaiseDisplay)">＋</button>
+            </div>
           </div>
           <div class="input-group">
             <label>BB SIZE ($)</label>
-            <input type="number" id="bb-dollar" placeholder="2" min="0.01" step="0.5" oninput="updateRaiseDisplay()">
+            <div class="num-stepper">
+              <button class="num-stepper-btn" onclick="stepInput('bb-dollar',-0.5,0.25,updateRaiseDisplay)">−</button>
+              <input type="number" id="bb-dollar" class="num-stepper-field" placeholder="2" min="0.25" step="0.5" oninput="updateRaiseDisplay()">
+              <button class="num-stepper-btn" onclick="stepInput('bb-dollar',0.5,0.25,updateRaiseDisplay)">＋</button>
+            </div>
           </div>
           <div id="raise-dollar-result" class="pot-result neutral" style="margin-top:1rem">Enter amounts</div>
         </div>
@@ -1269,11 +1389,19 @@
     <div class="dm-inputs">
       <div class="input-group">
         <label>Pot Size ($)</label>
-        <input type="number" id="pot-size" placeholder="100" min="0" oninput="calcPotOdds()">
+        <div class="num-stepper">
+          <button class="num-stepper-btn" onclick="stepInput('pot-size',-10,0,calcPotOdds)">−</button>
+          <input type="number" id="pot-size" class="num-stepper-field" placeholder="100" min="0" oninput="calcPotOdds()">
+          <button class="num-stepper-btn" onclick="stepInput('pot-size',10,0,calcPotOdds)">＋</button>
+        </div>
       </div>
       <div class="input-group">
         <label>Call Amount ($)</label>
-        <input type="number" id="call-amount" placeholder="20" min="0" oninput="calcPotOdds()">
+        <div class="num-stepper">
+          <button class="num-stepper-btn" onclick="stepInput('call-amount',-5,0,calcPotOdds)">−</button>
+          <input type="number" id="call-amount" class="num-stepper-field" placeholder="20" min="0" oninput="calcPotOdds()">
+          <button class="num-stepper-btn" onclick="stepInput('call-amount',5,0,calcPotOdds)">＋</button>
+        </div>
       </div>
     </div>
     <div class="dm-stats">
@@ -1306,6 +1434,17 @@
     </div>
     <div class="collapsible-body" id="rankings-body">
       <table class="rankings-table" id="rankings-table"></table>
+    </div>
+  </div>
+
+  <!-- Hand History -->
+  <div class="section glass collapsible-section" id="history-section">
+    <div class="section-title collapsible-header" onclick="toggleSection('history')">
+      HAND HISTORY
+      <span class="collapse-arrow" id="history-arrow">▾</span>
+    </div>
+    <div class="collapsible-body" id="history-body">
+      <div class="history-empty">No hands yet — complete a hand and reset to see history.</div>
     </div>
   </div>
 
@@ -1480,11 +1619,11 @@ let holeCards = [];
 let community = { flop: [], turn: [], river: [] };
 let numPlayers = 4;
 let pickerTarget = null;
-let pickerRank = null;
-let pickerSuit = null;
+let pickerReplaceIdx = null;
 let calcTimeout = null;
 let equityHistory = []; // [{label, pct}]
-let prevWinPct = null;  // track previous win% for delta display
+let prevWinPct = null;
+let handHistory = []; // [{hole, community, winPct, handLabel}]
 
 const RANKS = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
 const SUITS = ['spades','hearts','diamonds','clubs'];
@@ -1495,29 +1634,30 @@ const RED_SUITS = new Set(['hearts','diamonds']);
 //  INIT
 // ═══════════════════════════════════════════════════
 window.addEventListener('load', () => {
-  buildRankButtons();
+  buildPickerGrid();
   renderAll();
 });
 
 // ═══════════════════════════════════════════════════
-//  CARD PICKER — 2-step tap (rank → suit → done)
+//  CARD PICKER — single-tap grid (rank rows × suit cols)
 // ═══════════════════════════════════════════════════
-const FACE_RANKS = ['A','K','Q','J','10'];
-const NUM_RANKS  = ['9','8','7','6','5','4','3','2'];
+const PICKER_RANKS = ['A','K','Q','J','10','9','8','7','6','5','4','3','2'];
+const PICKER_SUITS = ['spades','hearts','diamonds','clubs'];
 
-function buildRankButtons() {
-  function makeBtn(r, container) {
-    const btn = document.createElement('button');
-    btn.className = 'rank-btn';
-    btn.dataset.rank = r;
-    btn.textContent = r;
-    btn.onclick = () => selectRank(btn);
-    container.appendChild(btn);
-  }
-  const face = document.getElementById('picker-ranks-face');
-  const num  = document.getElementById('picker-ranks-num');
-  FACE_RANKS.forEach(r => makeBtn(r, face));
-  NUM_RANKS.forEach(r  => makeBtn(r, num));
+function buildPickerGrid() {
+  const grid = document.getElementById('picker-grid');
+  grid.innerHTML = '';
+  PICKER_RANKS.forEach(r => {
+    PICKER_SUITS.forEach(s => {
+      const btn = document.createElement('button');
+      btn.className = 'picker-card-btn' + (RED_SUITS.has(s) ? ' red' : '');
+      btn.dataset.rank = r;
+      btn.dataset.suit = s;
+      btn.innerHTML = r + '<br>' + SUIT_SYM[s];
+      btn.onclick = () => selectCard(btn);
+      grid.appendChild(btn);
+    });
+  });
 }
 
 function getAllSelectedCards() {
@@ -1526,34 +1666,23 @@ function getAllSelectedCards() {
 
 function cardKey(c) { return c.rank + '_' + c.suit; }
 
-function openPicker(target) {
+function openPicker(target, replaceIdx = null) {
   pickerTarget = target;
-  pickerRank = null;
-  pickerSuit = null;
+  pickerReplaceIdx = replaceIdx;
 
-  const titles = { hole:'Pocket Card', flop:'Flop Card', turn:'Turn Card', river:'River Card' };
-  document.getElementById('picker-title').textContent = titles[target] || 'Add Card';
-  document.getElementById('picker-step-hint').textContent = 'Pick a rank';
+  const titles = { hole: replaceIdx !== null ? 'Swap Card' : 'Pocket Card', flop: replaceIdx !== null ? 'Swap Card' : 'Flop Card', turn: replaceIdx !== null ? 'Swap Card' : 'Turn Card', river: replaceIdx !== null ? 'Swap Card' : 'River Card' };
+  document.getElementById('picker-title').textContent = titles[target] || 'Pick Card';
 
-  // Reset ranks — disable any whose entire suit set is taken
+  // Build used set — exclude the card being replaced so it can be re-picked
   const used = new Set(getAllSelectedCards().map(cardKey));
-  const suits = ['spades','hearts','diamonds','clubs'];
-  document.querySelectorAll('.rank-btn').forEach(btn => {
-    btn.classList.remove('selected');
-    const allTaken = suits.every(s => used.has(btn.dataset.rank + '_' + s));
-    btn.disabled = allTaken;
-  });
+  if (replaceIdx !== null) {
+    const replacing = getStageCards(target)[replaceIdx];
+    if (replacing) used.delete(cardKey(replacing));
+  }
 
-  // Suits start dimmed
-  document.querySelectorAll('.suit-btn').forEach(btn => {
-    btn.classList.remove('active');
-    btn.disabled = true;
+  document.querySelectorAll('.picker-card-btn').forEach(btn => {
+    btn.disabled = used.has(btn.dataset.rank + '_' + btn.dataset.suit);
   });
-
-  // Reset to rank step
-  document.getElementById('picker-ranks-wrap').classList.remove('hidden-step');
-  document.getElementById('picker-selected-rank').style.display = 'none';
-  document.getElementById('picker-suit-row').classList.remove('suit-step');
 
   document.getElementById('picker-modal').classList.remove('hidden');
 }
@@ -1561,47 +1690,35 @@ function openPicker(target) {
 function closePicker() {
   document.getElementById('picker-modal').classList.add('hidden');
   pickerTarget = null;
-  pickerRank = null;
-  pickerSuit = null;
+  pickerReplaceIdx = null;
 }
 
 function handlePickerOverlayClick(e) {
   if (e.target === document.getElementById('picker-modal')) closePicker();
 }
 
-function selectRank(btn) {
+function selectCard(btn) {
   if (btn.disabled) return;
-  pickerRank = btn.dataset.rank;
-
-  // Hide ranks, show suit step
-  document.getElementById('picker-ranks-wrap').classList.add('hidden-step');
-  const rankDisplay = document.getElementById('picker-selected-rank');
-  rankDisplay.textContent = pickerRank;
-  rankDisplay.style.display = 'block';
-  document.getElementById('picker-suit-row').classList.add('suit-step');
-  document.getElementById('picker-step-hint').textContent = 'Now pick a suit';
-
-  // Enable only suits that aren't taken
-  const used = new Set(getAllSelectedCards().map(cardKey));
-  document.querySelectorAll('.suit-btn').forEach(sb => {
-    sb.disabled = used.has(pickerRank + '_' + sb.dataset.suit);
-  });
-}
-
-function selectSuit(btn) {
-  if (!pickerRank || btn.disabled) return;
-  pickerSuit = btn.dataset.suit;
-  // Immediately add the card — no confirm step
+  const rank = btn.dataset.rank;
+  const suit = btn.dataset.suit;
   const cards = getStageCards(pickerTarget);
   const limit = getStageLimit(pickerTarget);
-  if (cards.length >= limit) { closePicker(); return; }
-  cards.push({ rank: pickerRank, suit: pickerSuit });
   const savedTarget = pickerTarget;
+  const wasReplace = pickerReplaceIdx !== null;
+
+  if (wasReplace) {
+    cards[pickerReplaceIdx] = { rank, suit };
+  } else {
+    if (cards.length >= limit) { closePicker(); return; }
+    cards.push({ rank, suit });
+  }
+
   closePicker();
   renderAll();
   scheduleCalc();
-  // Auto-advance: immediately reopen for 2nd hole card
-  if (savedTarget === 'hole' && holeCards.length < 2) {
+
+  // Auto-advance to 2nd hole card
+  if (!wasReplace && savedTarget === 'hole' && holeCards.length < 2) {
     setTimeout(() => openPicker('hole'), 80);
   }
 }
@@ -1658,12 +1775,15 @@ function renderAll() {
   holeCards.forEach((c, i) => {
     const el = document.createElement('div');
     el.className = 'playing-card ' + (RED_SUITS.has(c.suit) ? 'red' : 'black');
+    el.style.cursor = 'pointer';
+    el.title = 'Tap to swap';
     el.innerHTML = `
       <div class="corner">${c.rank}<br>${SUIT_SYM[c.suit]}</div>
       <div class="rank">${c.rank}</div>
       <div class="suit-sym">${SUIT_SYM[c.suit]}</div>
       <div class="corner-bot">${c.rank}<br>${SUIT_SYM[c.suit]}</div>
     `;
+    el.onclick = () => openPicker('hole', i);
     const rmBtn = document.createElement('button');
     rmBtn.className = 'remove-card';
     rmBtn.title = 'Remove';
@@ -1689,12 +1809,15 @@ function renderAll() {
     cards.forEach((c, i) => {
       const el = document.createElement('div');
       el.className = 'playing-card ' + (RED_SUITS.has(c.suit) ? 'red' : 'black');
+      el.style.cursor = 'pointer';
+      el.title = 'Tap to swap';
       el.innerHTML = `
         <div class="corner">${c.rank}<br>${SUIT_SYM[c.suit]}</div>
         <div class="rank">${c.rank}</div>
         <div class="suit-sym">${SUIT_SYM[c.suit]}</div>
         <div class="corner-bot">${c.rank}<br>${SUIT_SYM[c.suit]}</div>
       `;
+      el.onclick = ((s, idx) => () => openPicker(s, idx))(stage, i);
       const rmBtn = document.createElement('button');
       rmBtn.className = 'remove-card';
       rmBtn.textContent = '✕';
@@ -1751,6 +1874,7 @@ function resetStage(stage) {
 }
 
 function resetAll() {
+  saveToHistory();
   holeCards = [];
   community = { flop: [], turn: [], river: [] };
   equityHistory = [];
@@ -1764,6 +1888,69 @@ function resetAll() {
   document.getElementById('odds-bar').classList.add('hidden');
   document.getElementById('tie-row').style.display = 'none';
   renderAll();
+}
+
+// ═══════════════════════════════════════════════════
+//  HAND HISTORY
+// ═══════════════════════════════════════════════════
+function saveToHistory() {
+  if (holeCards.length < 2 || equityHistory.length === 0) return;
+  const lastEquity = equityHistory[equityHistory.length - 1];
+  const handLabel = document.getElementById('hand-label').textContent;
+  handHistory.unshift({
+    hole: [...holeCards],
+    community: { flop: [...community.flop], turn: [...community.turn], river: [...community.river] },
+    winPct: lastEquity.pct,
+    handLabel: handLabel !== '—' ? handLabel : '',
+    street: lastEquity.label,
+  });
+  if (handHistory.length > 5) handHistory.pop();
+  renderHistory();
+  // Open the history section if it has entries
+  const body = document.getElementById('history-body');
+  const arrow = document.getElementById('history-arrow');
+  if (handHistory.length === 1 && body && !body.classList.contains('open')) {
+    body.classList.add('open');
+    if (arrow) arrow.classList.add('open');
+  }
+}
+
+function renderHistory() {
+  const body = document.getElementById('history-body');
+  if (!body) return;
+  if (handHistory.length === 0) {
+    body.innerHTML = '<div class="history-empty">No hands yet — complete a hand and reset to see history.</div>';
+    return;
+  }
+  body.innerHTML = '';
+  handHistory.forEach(h => {
+    const div = document.createElement('div');
+    div.className = 'history-hand';
+    const allCards = [...h.hole, ...h.community.flop, ...h.community.turn, ...h.community.river];
+    const cardHtml = allCards.map((c, idx) => {
+      const sep = (idx === h.hole.length && h.community.flop.length > 0) ? '<div class="history-divider"></div>' : '';
+      return sep + `<div class="history-mini-card ${RED_SUITS.has(c.suit) ? 'red' : 'black'}">${c.rank}<br>${SUIT_SYM[c.suit]}</div>`;
+    }).join('');
+    const pct = Math.round(h.winPct);
+    const cls = pct >= 55 ? 'good' : pct <= 44 ? 'bad' : 'even';
+    div.innerHTML = `
+      <div class="history-cards">${cardHtml}</div>
+      <div class="history-meta">${h.handLabel || '—'}<br><span style="font-size:0.62rem;opacity:0.5">${h.street}</span></div>
+      <div class="history-win ${cls}">${pct}%</div>
+    `;
+    body.appendChild(div);
+  });
+}
+
+// ═══════════════════════════════════════════════════
+//  NUM STEPPER HELPER
+// ═══════════════════════════════════════════════════
+function stepInput(id, delta, min, callback) {
+  const el = document.getElementById(id);
+  const cur = parseFloat(el.value) || 0;
+  const next = Math.max(min, +(cur + delta).toFixed(2));
+  el.value = next;
+  if (callback) callback();
 }
 
 // ═══════════════════════════════════════════════════
